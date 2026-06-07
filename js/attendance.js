@@ -132,22 +132,48 @@ function onScanSuccess(decodedText, decodedResult) {
                 oscillator.stop(audioCtx.currentTime + 0.1);
             } catch(e) { console.log("Audio feedback disabled"); }
 
-            alert(`✅ ${data.name} erfolgreich eingecheckt!`);
+            showToast(`✅ ${data.name} eingecheckt!`, "success");
         } else {
-            alert(`⚠️ ${data.name} ist heute bereits eingecheckt.`);
+            showToast(`⚠️ ${data.name} ist bereits erfasst.`, "warning");
         }
 
     } catch (e) {
         console.error("Scan-Fehler:", e);
-        alert("❌ Ungültiger QR-Code. Dieser Code stammt nicht von einem Athleten-Profil.");
+        showToast("❌ Ungültiger QR-Code.", "error");
     }
+}
 
-    // Komfort-Funktion: Scanner nach erfolgreichem Scan direkt wieder zuklappen, spart Akku
-    if (html5QrcodeScanner) {
-        html5QrcodeScanner.clear();
-        html5QrcodeScanner = null;
-        document.getElementById('btnScanAthletes').innerHTML = '<span class="icon">📸</span> SCHÜLER SCANNEN';
-    }
+// Custom Toast Notification (Non-blocking)
+let lastToastTime = 0;
+function showToast(msg, type = "success") {
+    // Verhindere Spam (Cooldown von 2 Sekunden für Toasts)
+    if (Date.now() - lastToastTime < 2000) return;
+    lastToastTime = Date.now();
+
+    const toast = document.createElement('div');
+    toast.innerHTML = msg;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.backgroundColor = type === "error" ? '#e74c3c' : (type === "warning" ? '#f39c12' : '#2ecc71');
+    toast.style.color = '#fff';
+    toast.style.padding = '12px 24px';
+    toast.style.borderRadius = '8px';
+    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+    toast.style.zIndex = '9999';
+    toast.style.fontWeight = 'bold';
+    toast.style.fontSize = '14px';
+    toast.style.textAlign = 'center';
+    toast.style.animation = 'fadeIn 0.3s ease';
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => document.body.removeChild(toast), 500);
+    }, 3000);
 }
 
 function onScanFailure(error) {
