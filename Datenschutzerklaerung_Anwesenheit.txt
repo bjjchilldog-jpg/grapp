@@ -1,0 +1,39 @@
+# DATENSCHUTZERKLÄRUNG (MUSTER) FÜR DAS ANWESENHEITSTRACKING
+
+Wenn du die Webhook-Funktion der GrAPP nutzt, um Schüler-Scans in Google Sheets zu speichern, verarbeitest du personenbezogene Daten. Du solltest deine Gym-Mitglieder darüber informieren (z.B. per Aushang im Gym oder als Zusatz zu den Mitgliedsverträgen). 
+
+Hier ist ein rechtliches Muster, das du anpassen und verwenden kannst.
+
+---
+
+**Information zur Datenerfassung beim Check-In (Anwesenheitstracking)**
+
+Liebes Mitglied,
+
+um einen reibungslosen Ablauf unseres Trainingsbetriebs zu gewährleisten und eine Übersicht über die Trainingsbeteiligung zu erhalten, nutzen wir beim Betreten der Matte ein digitales Check-In-System mittels QR-Code (GrAPP).
+
+**1. Welche Daten werden erfasst?**
+Wenn du deinen persönlichen QR-Code aus der App vorzeigst und dieser vom Coach gescannt wird, werden folgende Daten verarbeitet:
+- Dein Vor- und Nachname
+- Deine aktuelle Graduierung (Gürtel/Level)
+- Die besuchte Kampfsportart
+- Datum und exakte Uhrzeit des Check-Ins
+
+**2. Zweck der Verarbeitung**
+Die Datenerfassung dient ausschließlich internen Verwaltungszwecken:
+- Dokumentation der Trainingsbeteiligung
+- Nachverfolgbarkeit für Graduierungs-Voraussetzungen (Mindestanzahl an Trainingseinheiten)
+- Ggf. Kontaktnachverfolgung aus sicherheits- oder gesundheitsrelevanten Gründen
+
+**3. Wo werden die Daten gespeichert?**
+Die gescannten Daten werden verschlüsselt an eine geschützte Datenbank (Google Sheets, betrieben von Google Cloud EMEA Limited, Irland) übertragen, auf die ausschließlich die Headcoaches / das Gym-Management Zugriff haben. Die Daten werden weder verkauft noch an unbeteiligte Dritte weitergegeben.
+
+**4. Löschung der Daten**
+Die Anwesenheitslisten werden regelmäßig (z.B. am Ende eines Kalenderjahres) bereinigt, sofern sie nicht mehr für den genannten Zweck (z.B. Nachweis für Graduierungen) erforderlich sind.
+
+**5. Deine Rechte**
+Du hast jederzeit das Recht auf Auskunft über die zu deiner Person gespeicherten Daten sowie das Recht auf Berichtigung, Löschung oder Einschränkung der Verarbeitung. Bitte wende dich hierfür an die Gym-Leitung.
+
+---
+
+*Haftungsausschluss: Dies ist ein Formulierungsvorschlag und ersetzt keine anwaltliche Beratung. Bei Fragen zur DSGVO-Konformität in deinem speziellen Fall, wende dich bitte an einen Rechtsexperten.*

@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GrAPP - Die Kampfsport App</title>
+    <meta name="description" content="Trainingslogbuch, Regelwerke, Fight-Camp Planer und Team-Management für BJJ, MMA, Kickboxen und Judo.">
+    <meta name="theme-color" content="#000000">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- iOS / Safari Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GrAPP">
+    <link rel="apple-touch-icon" href="img/icon-192.png">
+
+    <link rel="stylesheet" href="css/style.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+
+<div id="splash-screen">
+    <div id="pro-splash-logo-box" style="display: none; text-align: center; margin-bottom: 20px;">
+        <img id="splash-gym-logo" src="" alt="Gym Logo" style="max-height: 150px; max-width: 250px; object-fit: contain;">
+    </div>
+
+    <div id="default-splash-logo-box">
+        <h1 style="border:none; font-size: 40px; color:#ffffff; margin-bottom: 0;">GrAPP<span style="color:#e74c3c;">.</span></h1>
+    </div>
+
+    <p style="color:#888; letter-spacing: 2px; text-transform: uppercase; font-size: 12px; margin-top: 10px;">System Loading</p>
+    <div style="margin: 20px auto 0 auto; width: 40px; height: 4px; background-color: #e74c3c;" id="splash-bar"></div>
+</div>
+
+<div id="stretchModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="close-modal" onclick="closeStretchModal()">✖</button>
+        <h2 id="modalStretchTitle" style="margin-bottom:5px; border-bottom:1px solid #333; padding-bottom:10px;" data-en="WEEK X - DAY Y">WOCHE X - TAG Y</h2>
+        
+        <div id="modalStretchInfo" style="font-size:13px; color:#ccc; line-height:1.5; margin-top:15px;"></div>
+
+        <label style="margin-top:20px; color:#f1c40f; display:flex; justify-content:space-between; align-items:center;">
+            <span data-en="COMMENTS / NOTES:">BEMERKUNGEN / NOTIZEN:</span>
+            <button class="btn-sm" style="margin:0; background:#333; color:#fff;" onclick="startDictation('modalStretchNotes')">🎤</button>
+        </label>
+        <textarea id="modalStretchNotes" placeholder="Wo hat es gezogen? Konntest du den Stretch vergrößern? Wie war das Brennen?" data-en-ph="Where did you feel the stretch? Could you increase it? How was the burn?"></textarea>
+        
+        <button class="btn btn-red" style="margin-top:20px; font-size:14px; padding:15px;" id="btnSaveStretch" onclick="saveStretchSession()" data-en="CHECK OFF & SAVE">ABHAKEN & SPEICHERN</button>
+        <button class="btn btn-dark" style="margin-top:10px; font-size:12px; padding:12px;" id="btnUncheckStretch" style="display:none;" onclick="uncheckStretchSession()" data-en="REMOVE CHECKMARK">HÄKCHEN ENTFERNEN</button>
+    </div>
+</div>
+
+<div id="infoModal" class="modal-overlay">
+    <div class="modal-content" style="text-align: center;">
+        <button class="close-modal" onclick="closeInfoModal()">✖</button>
+        <h2 id="infoModalTitle">Info</h2>
+        <div id="infoModalText" style="margin-top:15px; font-size:13px; color:#ccc;"></div>
+        <button class="btn btn-red" style="margin-top:20px;" onclick="closeInfoModal()">OK</button>
+    </div>
+</div>
+
+<div id="thankYouModal" class="modal-overlay">
+    <div class="modal-content" style="text-align: center; border-top: 4px solid #2ecc71;">
+        <button class="close-modal" onclick="closeThankYouModal()">✖</button>
+        <h2 style="color: #2ecc71; font-size: 24px;" data-en="OSS! THANK YOU VERY MUCH! 🥋🔥">OSS! VIELEN DANK! 🥋🔥</h2>
+        <div style="margin-top:20px; font-size:14px; color:#ccc; line-height:1.6; text-align: left;">
+            <p data-en="Hi Chaser,">Hi Chaser,</p>
+            <p data-en="Your support just virtually landed in our team fund! Every donation helps directly to">dein Support ist gerade virtuell in unserer Team-Kasse gelandet! Jede Spende hilft direkt dabei, die<strong>GrAPP</strong data-en="develop further, cover server costs, and make training even better for the crew.">weiterzuentwickeln, Serverkosten zu decken und das Training für die Crew noch besser zu machen.</p>
+            <p data-en="Humanity, structure, and a real error culture on the mat – thank you for being a part of it and keeping this project running.">Menschlichkeit, Struktur und eine echte Fehlerkultur auf der Matte – danke, dass du ein Teil davon bist und dieses Projekt am Laufen hältst.</p>
+            <p style="margin-top: 20px; font-weight: bold; color: #fff; text-align: center;" data-en="Next Stop: On the mat & sharpening your A-Game!">Next Stop: Auf die Matte & A-Game schärfen!</p>
+        </div>
+        <button class="btn btn-red" style="margin-top:25px; width: 100%;" onclick="closeThankYouModal()" data-en="BACK TO DASHBOARD">ZURÜCK ZUM DASHBOARD</button>
+    </div>
+</div>
+
+<div class="app-container">
+
+    <div class="app-header">
+        <div class="header-logo">GrAPP<span>.</span></div>
+        <button id="themeToggleBtn" onclick="toggleTheme()" class="btn-sm" style="background:transparent; border:1px solid #444; color:inherit; font-size:16px; padding:4px 8px; margin-right:5px; border-radius:6px; cursor:pointer;" title="Toggle Light/Dark Mode">🌙</button>
+        <select id="globalLang" class="sport-selector" style="margin-right:5px; width:auto; padding: 5px 10px;" onchange="changeLanguage()">
+            <option value="de" selected>🇩🇪 DE</option>
+            <option value="en">🇬🇧 EN</option>
+        </select>
+        <select id="globalSport" class="sport-selector" onchange="changeSport()">
+            <option value="bjj" selected>🥋 BJJ / Grappling</option>
+            <option value="mma">🤼 MMA</option>
+            <option value="kickboxen">🥊 Kickboxen</option>
+            <option value="judo">🥋 Judo</option>
+            <option value="fitness">💛 Fitnessboxen</option>
+        </select>
+    </div>
+
+    <div id="storageWarning" style="display:none;" data-en="⚠️ ATTENTION: Your browser (e.g. WhatsApp) blocks local storage. Please open in Safari/Chrome!">⚠️ ACHTUNG: Dein Browser (z.B. WhatsApp) blockiert den Speicher. Bitte in Safari/Chrome öffnen!</div>
+
+    <div id="view-menu" class="view active">
+        <div id="dynamicGreeting" style="font-size: 16px; font-weight: 900; color: #fff; text-align: center; margin-bottom: 15px; letter-spacing: 1px;"></div>
+        
+        <div id="smartReminder" class="smart-reminder" onclick="switchView('view-log')">
+            <strong data-en="⏰ SYSTEM CHECK DUE" data-en="⏰ SYSTEM CHECK DUE">⏰ SYSTEM CHECK FÄLLIG</strong>
+            <p data-en="Your training today. Time for your diary & system check!" data-en="Your training today. Time for your diary & system check!">Dein Training heute. Zeit für dein Tagebuch & System-Check!</p>
+        </div>
+        
+        <div id="surveyReminder" class="smart-reminder" style="background: linear-gradient(135deg, #2980b9, #2c3e50); margin-top: 10px;" onclick="openTeamSurvey()">
+            <strong data-en="🧠 TEAM SURVEY DUE" data-en="🧠 TEAM SURVEY DUE">🧠 TEAM UMFRAGE FÄLLIG</strong>
+            <p data-en="It's time for the bi-annual climate & mat feedback." data-en="It's time for the bi-annual climate & mat feedback.">Es ist Zeit für das halbjährliche Klima- & Matten-Feedback.</p>
+        </div>
+
+        <button class="btn btn-red menu-full" style="margin-bottom: 20px;" onclick="switchView('view-attendance')" id="btnAttendanceMenu"><span class="icon">🎟️</span><span id="txtAttendanceMenu" data-en="MY ID (CHECK-IN)" data-en="MY ID (CHECK-IN)">MEIN AUSWEIS (CHECK-IN)</span></button>
+
+        <h3 data-en="🥋 MY TRAINING CAMP">🥋 MEIN TRAININGSCAMP</h3>
+        <button class="btn btn-red menu-full" style="background:#8e44ad; border:none; margin-bottom:10px;" onclick="switchView('view-breathing-hub')"><span class="icon">🫁</span><span data-en="MAT SURVIVAL" data-en="MAT SURVIVAL">MAT SURVIVAL</span></button>
+        <button class="btn btn-white menu-full" onclick="switchView('view-log')"><span class="icon">📓</span><span data-en="DIARY & ANALYSIS" data-en="DIARY & ANALYSIS">TAGEBUCH & ANALYSE</span></button>
+        <div class="menu-grid">
+            <button class="btn btn-red" onclick="switchView('view-radar')"><span class="icon">🕸️</span><span data-en="SKILL RADAR" data-en="SKILL RADAR" data-en="SKILL RADAR">SKILL RADAR</span></button>
+            <button class="btn btn-dark" id="btnGamefinder" onclick="switchView('view-gamefinder')"><span class="icon">🧬</span><span data-en="GAMEFINDER" data-en="GAMEFINDER" data-en="GAMEFINDER">GAMEFINDER</span></button>
+            
+            <button class="btn btn-dark" onclick="switchView('view-timer')"><span class="icon">⏱️</span><span data-en="SMART TIMER" data-en="SMART TIMER" data-en="SMART TIMER">SMART TIMER</span></button>
+            <button class="btn btn-dark" onclick="switchView('view-stretching')"><span class="icon">🧘‍♂️</span><span data-en="4-WEEK STRETCHING" data-en="4-WEEK STRETCHING" data-en="4-WEEK STRETCHING">4-WOCHEN STRETCHING</span></button>
+        </div>
+
+        <h3 data-en="👥 EVENTS & CREW">👥 VERANSTALTUNGEN & CREW</h3>
+        <div class="menu-grid">
+            <button class="btn btn-dark" onclick="switchView('view-events')"><span class="icon">📅</span><span data-en="CALENDAR" data-en="CALENDAR">KALENDER</span></button>
+            <button class="btn btn-white" onclick="switchView('view-feedback')"><span class="icon">📢</span><span data-en="CREW FEEDBACK" data-en="CREW FEEDBACK">CREW FEEDBACK</span></button>
+        </div>
+
+        <h3 data-en="🏆 COMPETITION & SURVIVAL">🏆 TURNIERKADER & SURVIVAL</h3>
+        <button class="btn btn-red menu-full" style="background:#27ae60; border:none; margin-bottom:10px;" onclick="switchView('view-playbook')"><span class="icon">🗺️</span><span data-en="A-GAME PLAYBOOK">A-GAME PLAYBOOK</span></button>
+        <button class="btn btn-dark menu-full" onclick="switchView('view-camp')"><span class="icon">📅</span><span id="btnCampText" data-en="FIGHT CAMP PLANNER" data-en="FIGHT CAMP PLANNER" data-en="FIGHT CAMP PLANNER">FIGHT CAMP PLANER</span></button>
+        <div class="menu-grid">
+            <button class="btn btn-dark" id="btnRules" onclick="switchView('view-rules')"><span class="icon">⚖️</span><span data-en="RULESETS" data-en="RULESETS" data-en="RULESETS">REGELWERKE</span></button>
+            <button class="btn btn-dark" onclick="switchView('view-manifest')"><span class="icon">📜</span><span data-en="CORNER INFO" data-en="CORNER INFO" data-en="CORNER INFO">CORNER INFO</span></button>
+        </div>
+
+        <div id="dashboardCustomLinks" style="display:none; margin-top:20px;"></div>
+
+        <h3 data-en="⚙️ TEAM MANAGEMENT">⚙️ TEAM VERWALTUNG</h3>
+        <button class="btn btn-white menu-full" style="margin-bottom:10px;" onclick="switchView('view-profile')"><span class="icon">🛠️</span><span data-en="GYM PROFILE & SETUP" data-en="GYM PROFILE & SETUP">GYM PROFIL & SETUP</span></button>
+        <div class="menu-grid">
+            <button class="btn btn-dark menu-full" style="padding: 15px;" onclick="switchView('view-about')"><span class="icon">ℹ️</span><span data-en="ABOUT THE APP" data-en="ABOUT THE APP" data-en="ABOUT THE APP">ÜBER DIE APP</span></button>
+        </div>
+
+        <div id="hall-of-fame-container" style="margin-top: 30px;"></div>
+
+        <div style="text-align: center; font-size: 10px; color: #555; margin-top: 30px; margin-bottom: 20px;">
+            Powered by GrAPP – Developed by Martin Kremmel<br>Team Submission Grappling Neumarkt
+        </div>
+    </div>
+
+
+    <div id="view-attendance" class="view">
+        <h2 data-en="ATTENDANCE">ANWESENHEIT</h2>
+        
+        <div id="studentAttendanceBox">
+            <p style="font-size:11px; color:#aaa; text-align:center;" data-en="Show this code to your coach to check in." data-en="Show this code to your coach to check in.">Zeige diesen Code deinem Coach, um einzuchecken.</p>
+            <div style="text-align:center;">
+                <div id="qrCodeContainer"></div>
+            </div>
+            
+            <div class="card" style="border-left-color: #3498db; margin-top: 20px;">
+                <h3 data-en="🔗 GYM LINKING" data-en="🔗 GYM LINKING">🔗 GYM VERKNÜPFUNG</h3>
+                <p style="font-size:12px; color:#ccc;" data-en="If your coach showed you a setup code, click here to save your gym's Google Forms ID." data-en="If your coach showed you a setup code, click here to save your gym's Google Forms ID.">Wenn dein Coach dir einen Setup-Code gezeigt hat, klicke hier um die Google-Forms-ID deines Gyms zu speichern.</p>
+                <button class="btn-sm btn-sm-cal" style="width:100%; padding:12px; font-size:13px; margin-top:5px;" onclick="startGymQRScanner()" data-en="SCAN SETUP CODE" data-en="SCAN SETUP CODE">SETUP-CODE SCANNEN</button>
+                <div id="student-qr-reader" style="width: 100%; max-width: 400px; margin: 10px auto; border: 2px solid #333; border-radius: 8px; display: none;"></div>
+            </div>
+        </div>
+
+        <div id="coachAttendanceBox" style="display:none;">
+            <div class="card" style="border-left-color: #f1c40f;">
+                <h3 data-en="🔗 SETUP CODE FOR STUDENTS">🔗 SETUP-CODE FÜR SCHÜLER</h3>
+                <p style="font-size:12px; color:#ccc;" data-en="Let new students scan this code so their app knows which Google Form to open for the survey.">Lass neue Schüler diesen Code scannen, damit ihre App weiß, welches Google-Formular für die Umfrage geöffnet werden soll.</p>
+                <button class="btn-sm btn-sm-share" style="width:100%; padding:10px; font-size:12px;" onclick="showCoachSetupQR()" data-en="SHOW SETUP CODE">SETUP CODE ANZEIGEN</button>
+                <div id="coachSetupQR" style="text-align:center; background:#fff; padding:10px; border-radius:8px; margin-top:10px; display:none;"></div>
+            </div>
+
+            <button class="btn btn-red" style="margin-top:20px;" id="btnScanAthletes" onclick="startScanner()"><span class="icon">📸</span data-en="SCAN STUDENTS">SCHÜLER SCANNEN</button>
+            <div id="qr-reader"></div>
+            
+            <h3 style="margin-top:25px; border-top: 1px solid #333; padding-top:15px;" data-en="LIST TODAY">LISTE HEUTE</h3>
+            <div id="attendanceList" style="background:#111; border-radius:6px; border:1px solid #333;"></div>
+            <button class="btn btn-white" style="margin-top:10px; font-size:12px; padding:12px;" onclick="clearAttendanceList()" data-en="CLEAR LIST (NEW DAY)">LISTE LEEREN (NEUER TAG)</button>
+
+            <h3 style="margin-top:30px; border-top: 1px solid #333; padding-top:15px;" data-en="📊 ATHLETE REGISTRATION & YOUTH PROTECTION">📊 ATHLETEN-MELDELISTE & JUGENDSCHUTZ</h3>
+            <p style="font-size:11px; color:#aaa; margin-bottom:10px;" data-en="Overview of medical clearances, U18 status, and upcoming birthdays.">Übersicht über medizinische Freigaben, U18-Status und anstehende Geburtstage.</p>
+            <div id="coachBirthdayAlerts" style="margin-bottom:10px;"></div>
+            <div id="coachAthleteDatabaseList" style="background:#111; border-radius:6px; border:1px solid #333; max-height:300px; overflow-y:auto;">
+                </div>
+        </div>
+
+        <button class="btn btn-dark" style="margin-top:20px;" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
+    </div>
+
+    <div id="view-profile" class="view">
+        <h2 data-en="PROFILE & SETUP">PROFIL & SETUP</h2>
+        
+        <!-- GAMIFICATION SHIELD UI -->
+        <div id="gamificationProfileWrapper" style="transition: all 0.5s ease; border-radius: 8px; padding: 5px; margin-bottom: 15px;">
+            <div class="card" style="border-left-color: #f39c12; margin-bottom: 0;">
+                <h3 style="margin-top:0;">🏆 Patches & Trophäen</h3>
+                <p style="font-size:11px; color:#aaa; margin-bottom:10px;">Dein Fortschritt. Klicke auf ein graues Shield, um zu sehen, was noch fehlt!</p>
+                
+                <div id="trophyShelf" style="display:flex; gap:12px; overflow-x:auto; padding:10px 5px; scrollbar-width: none;">
+                    <!-- Shields injected via JS -->
+                </div>
+
+                <!-- TEST COUNTERS FOR USER TO PLAY WITH -->
+                <div style="margin-top:15px; border-top:1px solid #333; padding-top:15px;">
+                    <p style="font-size:10px; color:#f39c12; margin-bottom:10px;">🔧 TEST-BEREICH (Spiele mit den Zählern):</p>
+                    <div style="display:flex; gap:5px;">
+                        <div style="flex:1">
+                            <label style="font-size:10px;">Check-ins</label>
+                            <input type="number" id="testCheckins" value="0" oninput="renderTrophies()">
+                        </div>
+                        <div style="flex:1">
+                            <label style="font-size:10px;">Referrals</label>
+                            <input type="number" id="testReferrals" value="0" oninput="renderTrophies()">
+                        </div>
+                        <div style="flex:1">
+                            <label style="font-size:10px;">Module</label>
+                            <input type="number" id="testModules" value="0" oninput="renderTrophies()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p style="font-size:11px; color:#aaa; text-align:center;" data-en="Central Data for Team & App Automation" data-en="Central Data for Team & App Automation">Zentrale Daten für Team & App-Automatisierung</p>
+
+        <div id="kioskButtonBox" style="display:none; text-align:center; margin-bottom:20px;">
+            <button class="btn btn-red" style="width:100%; padding:15px; background:#e67e22; border:none; font-size:16px;" onclick="openKioskMode()" data-en="🤝 NEW TRIAL TRAINING (KIOSK)" data-en="🤝 NEW TRIAL TRAINING (KIOSK)">🤝 NEUES PROBETRAINING STARTEN (KIOSK)</button>
+            <p style="font-size:10px; color:#aaa; margin-top:5px;" data-en="Secure view for walk-ins. Your own profile remains protected." data-en="Secure view for walk-ins. Your own profile remains protected.">Sichere Ansicht für Walk-Ins. Dein eigenes Profil bleibt geschützt.</p>
+        </div>
+
+        <div class="card" style="border-left-color: #3498db;">
+            <h3 data-en="👤 PERSONAL MASTER DATA" data-en="👤 PERSONAL MASTER DATA">👤 PERSÖNLICHE STAMMDATEN</h3>
+            <label style="display:flex; justify-content:space-between; align-items:center;">
+                <span data-en="First and Last Name:" data-en="First and Last Name:">Vor- und Nachname:</span>
+                <button class="btn-sm" style="margin:0; background:#333; color:#fff;" onclick="startDictation('profName')">🎤</button>
+            </label>
+            <input type="text" id="profName" placeholder="Max Mustermann" data-en-ph="John Doe" data-en-ph="John Doe" oninput="saveProfile()" onchange="saveProfile()">
+            
+            <label data-en="Gender:" data-en="Gender:">Geschlecht:</label>
+            <select id="profGender" onchange="saveProfile()">
+                <option value="m" data-en="Male" data-en="Male">Männlich</option>
+                <option value="f" data-en="Female" data-en="Female">Weiblich</option>
+                <option value="d" data-en="Diverse" data-en="Diverse">Divers</option>
+            </select>
+            
+            <label style="display:flex; justify-content:space-between; align-items:center;">
+                <span data-en="Address:" data-en="Address:">Adresse:</span>
+                <button class="btn-sm" style="margin:0; background:#333; color:#fff;" onclick="startDictation('profAddress')">🎤</button>
+            </label>
+            <textarea id="profAddress" placeholder="Straße, PLZ, Ort" data-en-ph="Street, Zip, City" data-en-ph="Street, Zip, City" onchange="saveProfile()"></textarea>
+
+            <label data-en="Birthdate (Mandatory for Age Check):" data-en="Birthdate (Mandatory for Age Check):">Geburtsdatum (Zwingend für Altersklassen-Check):</label>
+            <input type="date" id="profBirthdate" onchange="checkAgeAndU18Logic(); saveProfile();">
+            
+            <label data-en="Blood Type:" data-en="Blood Type:">Blutgruppe:</label>
+            <select id="profBloodType" onchange="saveProfile()">
+                <option value="Unbekannt" data-en="Unknown / Not determined" data-en="Unknown / Not determined">Unbekannt / Nicht bestimmt</option>
+                <option value="A+">A+ (Aö)</option>
+                <option value="A-">A- (A-)</option>
+                <option value="B+">B+ (B+)</option>
+                <option value="B-">B- (B-)</option>
+                <option value="0+">0+ (0+)</option>
+                <option value="0-">0- (0-)</option>
+                <option value="AB+">AB+ (AB+)</option>
+                <option value="AB-">AB- (AB-)</option>
+            </select>
+
+            <label style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
+                <span data-en="Medications / Allergies / Chronic Illnesses:" data-en="Medications / Allergies / Chronic Illnesses:">Medikamente / Allergien / chron. Leiden:</span>
+                <button class="btn-sm" style="margin:0; background:#333; color:#fff;" onclick="startDictation('profMedication')">🎤</button>
+            </label>
+            <textarea id="profMedication" placeholder="z.B. Asthma-Spray, Penicillin-Allergie, keine..." data-en-ph="e.g. Asthma, Allergies, none..." data-en-ph="e.g. Asthma, Allergies, none..." onchange="saveProfile()"></textarea>
+
+            <label style="display:flex; justify-content:space-between; align-items:center;">
+                <span data-en="Your Phone Number (incl. country code):" data-en="Your Phone Number (incl. country code):">Deine Handynummer (inkl. Ländervorwahl, z.B. +49):</span>
+                <button class="btn-sm" style="margin:0; background:#333; color:#fff;" onclick="startDictation('profOwnPhone')">🎤</button>
+            </label>
+            <input type="text" id="profOwnPhone" placeholder="+49..." onchange="saveProfile()">
+
+            <label style="display:flex; justify-content:space-between; align-items:center;">
+                <span data-en="Emergency Contact (Partner / Parents):" data-en="Emergency Contact (Partner / Parents):">Notfallkontakt (Partner / Eltern) (inkl. Ländervorwahl):</span>
+                <button class="btn-sm" style="margin:0; background:#333; color:#fff;" onclick="startDictation('profEmergencyPhone')">🎤</button>
+            </label>
+            <input type="text" id="profEmergencyPhone" placeholder="+49..." onchange="saveProfile()">
+
+        </div>
+
+        <div id="profileU18Box" class="card" style="border-left-color: #f1c40f; display: none;">
+            <h3 style="color: #f1c40f;" data-en="🛡️ YOUTH PROTECTION VALIDATION (U18)" data-en="🛡️ YOUTH PROTECTION VALIDATION (U18)">🛡️ JUGENDSCHUTZ-VALIDIERUNG (U18)</h3>
+            <p style="font-size: 11px; color: #ccc; margin-bottom: 12px;" data-en="Since you are under 18, your parents must verify the training. A simple checkmark is not enough!" data-en="Since you are under 18, your parents must verify the training. A simple checkmark is not enough!">Da du minderjährig bist, müssen deine Eltern das Training verifizieren. Ein einfaches Häkchen reicht uns nicht aus!</p>
+            
+            <label data-en="Name of a Legal Guardian:" data-en="Name of a Legal Guardian:">Name eines Erziehungsberechtigten:</label>
+            <input type="text" id="profParentName" placeholder="Vor- und Nachname der Mutter/des Vaters" data-en-ph="First and Last Name of Mother/Father" onchange="saveProfile()">
+            
+            <label data-en="Parents' Phone Number:" data-en="Parents' Phone Number:">Telefonnummer der Eltern:</label>
+            <input type="text" id="profParentPhone" placeholder="0176..." onchange="saveProfile()">
+            
+            <button class="btn-sm btn-sm-radar" style="width:100%; margin-top:5px; margin-bottom:15px; padding:10px;" onclick="copyParentPhoneToEmergency()" data-en="👉 Set as primary emergency number" data-en="👉 Set as primary emergency number">👉 Als primäre Notfallnummer übernehmen</button>
+
+            <div style="background:#111; padding:10px; border-radius:6px; border:1px solid #444; margin-top:10px;">
+                <span style="font-size:12px; color:#f1c40f; font-weight:bold;" data-en="🔒 Start Parent Verification:" data-en="🔒 Start Parent Verification:">🔒 Eltern-Verifizierung starten:</span>
+                <p style="font-size:11px; color:#aaa; margin:5px 0 10px 0;" data-en="Hand the phone to your parents. They must send the confirmation from <b>their</b> account or call, so the phone number is verified as proof.">Übergib das Handy deinen Eltern. Sie müssen die Bestätigung von <b>ihrem</b data-en="account or call, so the phone number is verified as proof.">Account senden oder anrufen, damit die Handynummer als Beweis verifiziert ist.</p>
+                <button class="btn btn-white" style="font-size:12px; padding:12px; width:100%; background:#2ecc71; color:#000; border:none; margin-bottom:8px;" onclick="sendParentalVerificationWhatsApp()" data-en="📲 SEND CONFIRMATION VIA WHATSAPP" data-en="📲 SEND CONFIRMATION VIA WHATSAPP">📲 BESTÄTIGUNG PER WHATSAPP SENDEN</button>
+                <button class="btn btn-dark" style="font-size:12px; padding:12px; width:100%; border:1px solid #555;" onclick="callCoachForVerification()" data-en="📞 CALL COACH DIRECTLY" data-en="📞 CALL COACH DIRECTLY">📞 COACH DIREKT ANRUFEN</button>
+            </div>
+        </div>
+
+        <div class="card" style="border-left-color: #e74c3c;">
+            <h3 id="roleHeader" data-en="🥋 ROLE & RANKING" data-en="🥋 ROLE & RANKING">🥋 ROLLE & GRADUIERUNG</h3>
+            <p style="font-size:10px; color:#aaa; margin-top:0;" data-en="Choose your role and rank in the currently selected sport." data-en="Choose your role and rank in the currently selected sport.">Wähle deine Rolle und Graduierung in der aktuell gewählten Sportart.</p>
+            
+            <label data-en="Your Role:" data-en="Your Role:">Deine Rolle:</label>
+            <select id="profRole" onchange="toggleCoachFields(); saveProfile();">
+                <option value="student" data-en="Student / Athlete" data-en="Student / Athlete">Schüler / Athlet</option>
+                <option value="coach" data-en="Coach / Trainer" data-en="Coach / Trainer">Coach / Trainer</option>
+            </select>
+
+            <label data-en="Ranking (Belt/Level):" data-en="Ranking (Belt/Level):">Graduierung (Belt/Level):</label>
+            <select id="profBelt" onchange="saveProfile()">
+                <option value="White" data-en="White / Beginner">White / Beginner</option>
+                <option value="Blue" data-en="Blue / Advanced">Blue / Advanced</option>
+                <option value="Purple" data-en="Purple / Elite">Purple / Elite</option>
+                <option value="Brown">Brown</option>
+                <option value="Black">Black Belt / Master</option>
+                <option value="Keine" data-en="No Ranking">Keine Graduierung</option>
+            </select>
+            
+            <label data-en="Date of Ranking (Optional):">Datum der Graduierung (Optional):</label>
+            <input type="date" id="profBeltDate" onchange="saveProfile()">
+
+            <div id="surveyMethodBox" style="display:none; margin-top:15px; border-top:1px dotted #444; padding-top:15px;">
+                <label data-en="Survey Method (Team Survey):">Umfrage-Methode (Team Umfrage):</label>
+                <select id="profSurveyMethod" onchange="toggleCoachFields(); saveProfile();">
+                    <option value="google" data-en="Google Forms (Recommended)">Google Forms (Empfohlen)</option>
+                    <option value="whatsapp" data-en="WhatsApp / Direct Message">WhatsApp / Direktnachricht</option>
+                    <option value="disabled" data-en="Completely Disable">Komplett deaktivieren</option>
+                </select>
+                
+                <div id="surveyWarningBox" style="display:none; background:rgba(231,76,60,0.12); border-left:4px solid #e74c3c; padding:12px 14px; margin-top:12px; font-size:12px; color:#e74c3c; line-height:1.6; border-radius:0 6px 6px 0;">
+                    ⚠️ <strong data-en="NOT RECOMMENDED:">NICHT EMPFOHLEN:</strong> <span data-en="Disabling team feedback contradicts the core philosophy of GrAPP. You deprive your students of an important, protected channel for conflict prevention and close your eyes to valuable data on mat culture.">Das Deaktivieren des Team-Feedbacks widerspricht der Kernphilosophie von GrAPP. Du nimmst deinen Schülern damit einen wichtigen, geschützten Kanal zur Konfliktprävention und verschließt die Augen vor wertvollen Daten zur Mattenkultur.</span></div>
+
+                <label style="margin-top:10px;" data-en="Time Window (How long fillable?):">Zeitfenster (Wie lange ausfüllbar?):</label>
+                <select id="profSurveyWindow" onchange="saveProfile()">
+                    <option value="1" data-en="1 Week">1 Woche</option>
+                    <option value="2" selected data-en="2 Weeks">2 Wochen</option>
+                    <option value="4" data-en="4 Weeks">4 Wochen</option>
+                </select>
+            </div>
+
+            <div id="coachFields" style="display:none; margin-top:15px; border-top:1px dotted #444; padding-top:15px;">
+                <label style="color:#f1c40f;" data-en="Your WhatsApp Number (For Feedback)" data-en="Your WhatsApp Number (For Feedback)">Deine WhatsApp Nummer (Für Feedback)</label>
+                <p style="font-size:10px; color:#ccc; margin-top:2px; margin-bottom:5px;" data-en="Transferred via QR code to students so feedback reaches you." data-en="Transferred via QR code to students so feedback reaches you.">Wird per QR-Code an Schüler übertragen, damit Feedback bei dir ankommt.</p>
+                <input type="text" id="profCoachPhone" placeholder="491701234567" data-en-ph="12025550123" onchange="saveProfile()">
+                
+                <label style="color:#f1c40f; margin-top:15px;" data-en="Affiliate Headcoach WhatsApp (Optional)">Affiliate Leiter / Headcoach WhatsApp (Optional)</label>
+                <p style="font-size:10px; color:#ccc; margin-top:2px; margin-bottom:5px;" data-en="Provides students a direct, neutral line to the Head Blackbelt.">Gibt Schülern im Feedback-Bereich einen direkten, neutralen Draht zum Head-Blackbelt.</p>
+                <input type="text" id="profAffiliatePhone" placeholder="491701234567" data-en-ph="12025550123" onchange="saveProfile()">
+                
+                <label style="color:#f1c40f; margin-top:15px;" data-en="Google Forms Link / ID (Optional)">Google Forms Link / ID (Optional)</label>
+                <p style="font-size:10px; color:#ccc; margin-top:2px; margin-bottom:5px;" data-en="Only needed if 'Google Forms' is selected above." data-en="Only needed if 'Google Forms' is selected above.">Nur nötig, falls 'Google Forms' oben gewählt wurde.</p>
+                <input type="text" id="profFormId" placeholder="https://docs.google.com/forms/d/e/.../viewform" data-en-ph="https://docs.google.com/forms/d/e/.../viewform" data-en-ph="https://docs.google.com/forms/d/e/.../viewform" onchange="saveProfile()">
+                
+                <label style="color:#2ecc71; margin-top:15px;" data-en="Google Sheets Webhook (Attendance)" data-en="Google Sheets Webhook (Attendance)">Google Sheets Webhook (Anwesenheit)</label>
+                <p style="font-size:10px; color:#ccc; margin-top:2px; margin-bottom:5px;" data-en="If filled, scanned students are transferred live to a Google Sheet." data-en="If filled, scanned students are transferred live to a Google Sheet.">Wenn ausgefüllt, werden gescannte Schüler live in ein Google Sheet übertragen.</p>
+                <input type="text" id="profWebhookUrl" placeholder="https://script.google.com/macros/s/.../exec" data-en-ph="https://script.google.com/macros/s/.../exec" data-en-ph="https://script.google.com/macros/s/.../exec" onchange="saveProfile()">
+                
+                <label style="color:#2ecc71; margin-top:15px;" data-en="WhatsApp Group Invite Link" data-en="WhatsApp Group Invite Link">WhatsApp Gruppen-Einladungslink</label>
+                <p style="font-size:10px; color:#ccc; margin-top:2px; margin-bottom:5px;" data-en="Transferred during setup scan so students can join the group." data-en="Transferred during setup scan so students can join the group.">Wird beim Setup-Scan an die Schüler übertragen, damit diese der Gruppe beitreten können.</p>
+                <input type="text" id="profWaGroup" placeholder="https://chat.whatsapp.com/..." data-en-ph="https://chat.whatsapp.com/..." data-en-ph="https://chat.whatsapp.com/..." onchange="saveProfile()">
+
+                <label style="color:#e67e22; margin-top:15px;" data-en="Trial Training Waiver / Disclaimer">Probetraining Waiver / Haftungsausschluss</label>
+                <p style="font-size:10px; color:#ccc; margin-top:2px; margin-bottom:5px;" data-en="Your custom disclaimer for new students. Placeholders <strong style='color:#f1c40f;'>[SPORTART], [COACH], [TELEFON]</strong> will be dynamically replaced!">Dein individueller Haftungsausschluss für neue Schüler. Platzhalter <strong style="color:#f1c40f;">[SPORTART], [COACH], [TELEFON]</strong> werden dynamisch ersetzt!</p>
+                <textarea id="profWaiverText" rows="6" placeholder="Hiermit bestätige ich, dass ich an [SPORTART] auf eigene Gefahr teilnehme..." data-en-ph="I hereby confirm that I participate in [SPORT] at my own risk..." data-en-ph="I hereby confirm that I participate in [SPORT] at my own risk..." onchange="saveProfile()"></textarea>
+
+                <label style="color:#e67e22; margin-top:15px;" data-en="Waiver Webhook / System Link (Optional)" data-en="Waiver Webhook / System Link (Optional)">Waiver Webhook / System Link (Optional)</label>
+                <p style="font-size:10px; color:#ccc; margin-top:2px; margin-bottom:5px;" data-en="Enter a Make/Zapier/System link to automatically push signed waivers to your club system." data-en="Enter a Make/Zapier/System link to automatically push signed waivers to your club system.">Trage einen Make/Zapier/System Link ein, um unterschriebene Waiver automatisch ins Vereins-System zu pushen.</p>
+                <input type="url" id="profWaiverWebhook" placeholder="https://hook.eu1.make.com/..." data-en-ph="https://hook.eu1.make.com/..." data-en-ph="https://hook.eu1.make.com/..." onchange="saveProfile()">
+
+                <label style="color:#e67e22; margin-top:15px;" data-en="WhatsApp text for absent parents (Remote Consent)">WhatsApp-Text für abwesende Eltern (Remote Consent)</label>
+                <p style="font-size:10px; color:#ccc; margin-top:2px; margin-bottom:5px;" data-en="This text goes to parents who are not on-site. Placeholders <strong style='color:#f1c40f;'>[SCHÜLER], [ELTERN], [SPORTART], [COACH], [TELEFON]</strong> will be replaced. The app link is appended automatically.">Dieser Text geht an Eltern, die nicht vor Ort sind. Platzhalter <strong style="color:#f1c40f;">[SCHÜLER], [ELTERN], [SPORTART], [COACH], [TELEFON]</strong> werden automatisch ersetzt. Der Link zur Unterschrift wird immer angehängt.</p>
+                <textarea id="profRemoteConsentText" rows="4" placeholder="Sehr geehrte:r [ELTERN], Ihr Kind [SCHÜLER] steht gerade bei uns im Gym... Bei Rückfragen stehe ich unter [TELEFON] zur Verfügung. Beste Grüße, [COACH]" data-en-ph="Hello, your child [STUDENT] is with us for a trial training. To let them on the mats, I need your immediate consent..." data-en-ph="Hello, your child [STUDENT] is with us for a trial training. To let them on the mats, I need your immediate consent..." onchange="saveProfile()"></textarea>
+
+                <h4 style="color:#3498db; margin-top:20px; border-top:1px dotted #444; padding-top:15px;" data-en="🔗 Custom Links (For Students)" data-en="🔗 Custom Links (For Students)">🔗 Custom Links (Für Schüler)</h4>
+                <div style="display:flex; gap:5px;"><input type="text" id="cl1_name" placeholder="Titel Link 1" data-en-ph="Title Link 1" data-en-ph="Title Link 1" style="flex:1;" onchange="saveProfile()"><input type="url" id="cl1_url" placeholder="URL Link 1" data-en-ph="URL Link 1" data-en-ph="URL Link 1" style="flex:2;" onchange="saveProfile()"></div>
+                <div style="display:flex; gap:5px;"><input type="text" id="cl2_name" placeholder="Titel Link 2" data-en-ph="Title Link 2" data-en-ph="Title Link 2" style="flex:1;" onchange="saveProfile()"><input type="url" id="cl2_url" placeholder="URL Link 2" data-en-ph="URL Link 2" data-en-ph="URL Link 2" style="flex:2;" onchange="saveProfile()"></div>
+                <div style="display:flex; gap:5px;"><input type="text" id="cl3_name" placeholder="Titel Link 3" data-en-ph="Title Link 3" style="flex:1;" onchange="saveProfile()"><input type="url" id="cl3_url" placeholder="URL Link 3" data-en-ph="URL Link 3" style="flex:2;" onchange="saveProfile()"></div>
+
+                <h4 style="color:#e74c3c; margin-top:20px; border-top:1px dotted #444; padding-top:15px;" data-en="🎨 White-Labeling (App Design)">🎨 White-Labeling (App Design)</h4>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <div style="flex:1;"><label data-en="Primary">Primary</label></div>
+                        <input type="color" id="profColorPrimary" value="#e74c3c" style="padding:0; height:30px; width:40px;" onchange="document.getElementById('profColorPrimaryTxt').value = this.value; saveProfile()">
+                        <input type="text" id="profColorPrimaryTxt" value="#e74c3c" style="flex:2; padding:5px; font-family:monospace;" onchange="document.getElementById('profColorPrimary').value = this.value; saveProfile()">
+                    </div>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <div style="flex:1;"><label data-en="Accent">Accent</label></div>
+                        <input type="color" id="profColorAccent" value="#3498db" style="padding:0; height:30px; width:40px;" onchange="document.getElementById('profColorAccentTxt').value = this.value; saveProfile()">
+                        <input type="text" id="profColorAccentTxt" value="#3498db" style="flex:2; padding:5px; font-family:monospace;" onchange="document.getElementById('profColorAccent').value = this.value; saveProfile()">
+                    </div>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <div style="flex:1;"><label data-en="Outer Background">Rand Außen (PC)</label></div>
+                        <input type="color" id="profColorBg" value="#000000" style="padding:0; height:30px; width:40px;" onchange="document.getElementById('profColorBgTxt').value = this.value; saveProfile()">
+                        <input type="text" id="profColorBgTxt" value="#000000" style="flex:2; padding:5px; font-family:monospace;" onchange="document.getElementById('profColorBg').value = this.value; saveProfile()">
+                    </div>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <div style="flex:1;"><label data-en="App Background">Hintergrund Innen</label></div>
+                        <input type="color" id="profColorAppBg" value="#1a1a1a" style="padding:0; height:30px; width:40px;" onchange="document.getElementById('profColorAppBgTxt').value = this.value; saveProfile()">
+                        <input type="text" id="profColorAppBgTxt" value="#1a1a1a" style="flex:2; padding:5px; font-family:monospace;" onchange="document.getElementById('profColorAppBg').value = this.value; saveProfile()">
+                    </div>
+                </div>
+                <label style="margin-top:10px;" data-en="Team Logo (Upload or URL):">Team Logo (Upload oder URL):</label>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="file" id="profLogoUpload" accept="image/*" style="flex:1; padding:5px; font-size:11px;" onchange="if(typeof handleLogoUpload === 'function') handleLogoUpload(event)">
+                    <input type="url" id="profLogoUrl" placeholder="https://.../logo.png" style="flex:2;" onchange="saveProfile()">
+                </div>
+                
+                <div style="display:flex; gap:10px; margin-top:10px; align-items:center;">
+                    <div style="flex:1;"><label data-en="Header Logo Placement:">Platzierung Header:</label></div>
+                    <select id="profLogoPos" style="flex:2;" onchange="saveProfile()">
+                        <option value="left" data-en="Left (Default)">Links (Standard)</option>
+                        <option value="center" data-en="Center">Mittig</option>
+                    </select>
+                </div>
+                
+                <div style="display:flex; gap:10px; margin-top:10px; align-items:center;">
+                    <div style="flex:1;"><label data-en="Header Logo Size:">Größe Header:</label></div>
+                    <input type="range" id="profLogoSize" min="20" max="120" value="40" style="flex:1;" onchange="document.getElementById('profLogoSizeTxt').innerText = this.value + 'px'; saveProfile()">
+                    <span id="profLogoSizeTxt" style="font-size:12px; width:40px; text-align:right;">40px</span>
+                </div>
+                
+                <button type="button" class="btn btn-sm-share" onclick="shareGymBranding()" style="width:100%; margin-top:20px; padding:15px; font-size:13px; font-weight:900;" data-en="📲 SHARE GYM BRANDING TO STUDENTS">📲 GYM-BRANDING AN SCHÜLER TEILEN</button>
+            </div>
+        </div>
+
+        <div class="card" style="border-left-color: #f1c40f;">
+            <h3 data-en="🕒 REGULAR TRAINING DAYS">🕒 REGULÄRE TRAININGSTAGE</h3>
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:5px; margin-top:10px;">
+                <button id="day_1" class="btn-sm" onclick="toggleTrainingDay(1)">MO</button>
+                <button id="day_2" class="btn-sm" onclick="toggleTrainingDay(2)">DI</button>
+                <button id="day_3" class="btn-sm" onclick="toggleTrainingDay(3)">MI</button>
+                <button id="day_4" class="btn-sm" onclick="toggleTrainingDay(4)">DO</button>
+                <button id="day_5" class="btn-sm" onclick="toggleTrainingDay(5)">FR</button>
+                <button id="day_6" class="btn-sm" onclick="toggleTrainingDay(6)">SA</button>
+                <button id="day_0" class="btn-sm" onclick="toggleTrainingDay(0)">SO</button>
+            </div>
+        </div>
+
+        <div class="card" style="border-left-color: #f1c40f;">
+            <h3 style="margin-top:5px; color: #f1c40f;" data-en="⭐ GRAPP PRO ACTIVATION">⭐ GRAPP PRO ACTIVATION</h3>
+            <label style="font-size: 11px; color: #f1c40f;" data-en="ENTER PRO LICENSE KEY:">PRO-LIZENZSCHLÜSSEL EINGEBEN:</label>
+            <div style="display: flex; gap: 8px; margin-top: 5px;">
+                <input type="text" id="proKeyInput" placeholder="Dein persönlicher Key..." data-en-ph="Your personal key..." style="flex: 2; margin: 0; text-transform: uppercase;">
+                <button class="btn btn-red" style="flex: 1; margin: 0; padding: 10px; font-size: 12px;" onclick="checkProKey()" data-en="ACTIVATE">AKTIVIEREN</button>
+            </div>
+            <div id="proKeyFeedback" style="font-size: 11px; margin-top: 5px; text-align: center;"></div>
+        </div>
+
+        <button class="btn btn-dark" style="margin-top:20px;" onclick="switchView('view-menu')" data-en="SAVE & BACK">SPEICHERN & ZURÜCK</button>
+        <button class="btn-sm btn-sm-red" style="margin-top:20px; width:100%; opacity:0.3;" onclick="debugForceSurvey()" data-en="🛠️ DEBUG: MAKE SURVEY DUE NOW">🛠️ DEBUG: UMFRAGE JETZT FÄLLIG MACHEN</button>
+    </div>
+
+    <div id="view-feedback" class="view">
+        <h2 data-en="CREW FEEDBACK">CREW FEEDBACK</h2>
+
+        <div style="background:#222; padding:10px; border-radius:6px; font-size:11px; color:#ccc; border-left:3px solid #f1c40f; margin-bottom:15px; line-height:1.4;">
+            <strong data-en="✈️ AVIATION MODEL:">✈️ AVIATION MODEL:</strong> <span data-en="This is not a complaint box. Constructive feedback for team climate, safety & progress belongs in debriefing –">Dies ist kein Meckerkasten. Konstruktives Feedback für Teamklima, Sicherheit & Fortschritt gehört ins Debriefing –</span> <strong data-en="not">nicht</strong> <span data-en="during ongoing training. Your focus must always be on a real solution!">ins laufende Training. Dein Fokus muss immer auf einer echten Lösung liegen!</span></div>
+
+        <button class="btn btn-white" style="margin-top:10px; width:100%;" onclick="openTeamSurvey()"><span class="icon">🧠</span><span data-en="START TEAM SURVEY">TEAM UMFRAGE STARTEN</span></button>
+        <p style="font-size:11px; color:#aaa; text-align:center; margin-top:5px; margin-bottom:20px;" data-en="Bi-annual Climate and Mat Feedback">Halbjährliches Klima- und Matten-Feedback</p>
+
+        <div id="affiliateFeedbackBox" class="card" style="border-left-color: #3498db; display: none; margin-bottom: 20px;">
+            <h3 data-en="🥋 DIRECT LINE TO HEADCOACH">🥋 DIREKTER DRAHT ZUM HEADCOACH</h3>
+            <p style="font-size:11px; color:#ccc; margin-bottom:15px; line-height:1.4;" data-en="Confidential channel directly to the Blackbelt/Affiliate Head. Use this for technical BJJ questions or sensitive issues.">Vertraulicher Kanal direkt zum Blackbelt / Affiliate Leiter. Nutze dies für rein technische BJJ Fragen oder sehr sensible Themen (z.B. Mobbing).</p>
+            <button class="btn btn-white" style="width:100%; border:1px solid #3498db; color:#3498db;" onclick="contactHeadcoach()" data-en="📲 CONTACT HEADCOACH">📲 HEADCOACH KONTAKTIEREN</button>
+        </div>
+
+        <div class="card" style="border-left-color: #e74c3c;">
+            <h3 data-en="📋 CREATE REPORT">📋 BERICHT ERSTELLEN</h3>
+            
+            <label data-en="Urgency / Priority:">Dringlichkeit / Priorität:</label>
+            <select id="fbUrgency">
+                <option value="LOW (Info)" data-en="🟢 LOW (Information)">🟢 LOW (Information)</option>
+                <option value="MEDIUM (Aktion nötig)" selected data-en="🟡 MEDIUM (Action Required)">🟡 MEDIUM (Handlungsbedarf)</option>
+                <option value="CRITICAL (Sofort prüfen)" data-en="🔴 CRITICAL (Imminent Danger / Safety)">🔴 CRITICAL (Gefahr im Verzug / Sicherheit)</option>
+            </select>
+
+            <label data-en="Category (What happened?):">Kategorie (Was ist passiert?):</label>
+            <select id="fbCategory">
+                <option value="Sicherheit auf der Matte" data-en="🚨 Safety / Injury Risk">🚨 Sicherheit / Verletzungsgefahr</option>
+                <option value="Hygiene (Teammitglied oder Halle)" data-en="🧼 Hygiene (Team Member or Facility)">🧼 Hygiene (Teammitglied oder Halle)</option>
+                <option value="Grenzüberschreitung / Belästigung" data-en="⚠️ Boundary Violation / Harassment">⚠️ Grenzüberschreitung / Belästigung</option>
+                <option value="Teamklima / Kommunikation" data-en="👥 Team Climate / Communication">👥 Teamklima / Kommunikation</option>
+                <option value="Trainingsinhalt / Didaktik" data-en="🥋 Training Content / Didactics">🥋 Trainingsinhalt / Didaktik</option>
+                <option value="Sonstiges" data-en="❓ Other">❓ Sonstiges</option>
+            </select>
+
+            <label style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
+                <span data-en="Detailed Observation:">Detaillierte Beobachtung:</span>
+                <button class="btn-sm" style="margin:0; background:#333; color:#fff;" onclick="startDictation('fbProblem')">🎤</button>
+            </label>
+            <textarea id="fbProblem" placeholder="Beschreibe die Situation sachlich... Was genau ist vorgefallen?" data-en-ph="Describe the situation objectively... What exactly happened?"></textarea>
+
+            <label style="margin-top:15px; color:#2ecc71; display:flex; justify-content:space-between; align-items:center;">
+                <span data-en="Mandatory: Your Proposed Solution?">Pflicht: Dein Lösungsvorschlag?</span>
+                <button class="btn-sm" style="margin:0; background:#333; color:#fff;" onclick="startDictation('fbSolution')">🎤</button>
+            </label>
+            <textarea id="fbSolution" placeholder="Wie können wir das Problem gemeinsam klären oder verbessern?" data-en-ph="How can we solve or improve the problem together?"></textarea>
+
+            <div style="margin-top:20px; border-top:1px dotted #555; padding-top:15px;">
+                <label style="color:#fff; margin-bottom:10px;" data-en="Type of Report & Identity Protection:">Art der Meldung & Identitätsschutz:</label>
+                
+                <label style="display:block; margin-bottom:15px; cursor:pointer; font-size:13px; font-weight:normal; text-transform:none; color:#ccc; line-height:1.4;">
+                    <input type="radio" name="fbIdentity" value="anonym" checked onchange="toggleFbIdentity()">
+                    <strong style="color:#fff;" data-en="1. Submit completely anonymously">1. Komplett anonym einreichen</strong>
+                    <div style="font-size:11px; color:#e74c3c; margin-top:4px;" data-en="Attention: With anonymous reports, the coach can review the incident internally and increase vigilance, but cannot initiate direct personnel or legal action against individuals, as personal validation is lacking.">Achtung: Bei anonymen Meldungen kann der Coach den Vorfall intern prüfen und die Wachsamkeit erhöhen, aber keine direkten personellen oder rechtlichen Schritte gegen Einzelpersonen einleiten, da eine persönliche Validierung fehlt.</div>
+                </label>
+
+                <label style="display:block; margin-bottom:15px; cursor:pointer; font-size:13px; font-weight:normal; text-transform:none; color:#ccc; line-height:1.4;">
+                    <input type="radio" name="fbIdentity" value="vertraulich" onchange="toggleFbIdentity()">
+                    <strong style="color:#fff;" data-en="2. I want the coach to contact me confidentially.">2. Ich möchte, dass der Coach mich vertraulich kontaktiert.</strong>
+                </label>
+
+                <label style="display:block; margin-bottom:15px; cursor:pointer; font-size:13px; font-weight:normal; text-transform:none; color:#ccc; line-height:1.4;">
+                    <input type="radio" name="fbIdentity" value="ombudsmann" onchange="toggleFbIdentity()">
+                    <strong style="color:#fff;" data-en="3. Identity Protection (Trusted Member / Ombudsman)">3. Identitätsschutz (Vertrauensmitglied / Ombudsmann)</strong>
+                    <div style="font-size:11px; color:#aaa; margin-top:4px;" data-en="I do not want to submit my name directly to the head coach, but I am willing to be contacted by an elected trusted member as a neutral instance to anonymously validate the incident in advance.">Ich möchte meinen Namen nicht direkt an den Headcoach übermitteln, bin aber bereit, dass sich ein gewähltes Vertrauensmitglied als neutrale Instanz bei mir meldet, um den Vorfall vorab anonymisiert zu validieren.</div>
+                </label>
+            </div>
+
+            <div id="fbContactBox" style="display:none; background:#222; padding:15px; border-radius:6px; margin-top:5px; border-left:3px solid #3498db;">
+                <label style="color:#3498db; margin-top:0;" data-en="Name & Phone/Email:">Name & Telefon/E-Mail:</label>
+                <input type="text" id="fbContactData" placeholder="Max Muster, 0151..." data-en-ph="John Doe, 1202555...">
+            </div>
+
+            <button class="btn btn-red" style="margin-top:20px;" onclick="sendCrewFeedback()" data-en="SUBMIT REPORT">BERICHT ABSCHICKEN</button>
+        </div>
+        
+        <button class="btn btn-dark" style="margin-top:20px;" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
+    </div>
+
+    <div id="view-stretching" class="view">
+        <h2 data-en="HYPERBOLIC STRETCHING" data-en="HYPERBOLIC STRETCHING">HYPERBOLIC STRETCHING</h2>
+        <p style="font-size:11px; color:#aaa; text-align:center;" data-en="Full Split in 28 Days (4x per week)" data-en="Full Split in 28 Days (4x per week)">Vollen Spagat in 28 Tagen (4x pro Woche)</p>
+        
+        <div class="dash-container">
+            <div class="dash-box" style="border-bottom-color: #f1c40f;">
+                <div class="dash-label" data-en="PROGRAM PROGRESS" data-en="PROGRAM PROGRESS">PROGRAMM FORTSCHRITT</div>
+                <div class="dash-val" id="stretchProgress" style="color:#f1c40f;">0/16</div>
+            </div>
+        </div>
+
+        <div id="stretchingWeeks" style="margin-top: 20px;"></div>
+
+        <div class="card" style="border-left-color: #3498db; margin-top: 20px;">
+            <h3 data-en="ℹ️ HOW DOES IT WORK?" data-en="ℹ️ HOW DOES IT WORK?">ℹ️ WIE FUNKTIONIERT ES?</h3>
+            <p style="font-size:12px; color:#ccc; line-height:1.5; margin-top:5px;" data-en="Tap on one of the days above to open the exact" data-en="Tap on one of the days above to open the exact">Tippe auf einen der Tage oben, um das genaue<strong data-en="Stretching Protocol" data-en="Stretching Protocol" data-en="Stretching Protocol">Stretching-Protokoll</strong data-en="You can check off every day there." data-en="You can check off every day there." data-en="You can check off every day there.">aufzurufen. Du kannst dort jeden Tag abhaken.</p>
+        </div>
+
+        <button class="btn btn-dark" style="margin-top:20px;" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
+    </div>
+
+    <div id="view-radar" class="view">
+        <h2 id="radarTitle" data-en="SKILL RADAR" data-en="SKILL RADAR">SKILL RADAR</h2>
+        <p style="font-size:11px; color:#aaa; text-align:center;" data-en="Your profile at a glance. Where are your gaps?">Dein Profil auf einen Blick. Wo sind deine Lücken?</p>
+        <canvas id="radarCanvas" width="300" height="300"></canvas>
+        <div class="dash-container" style="margin-top:20px;">
+            <div class="dash-box" style="border-bottom-color: #2ecc71;">
+                <div class="dash-label" data-en="OVERALL SCORE">OVERALL SCORE</div>
+                <div class="dash-val" id="radarOverallScore" style="color:#2ecc71;">0/100</div>
+            </div>
+        </div>
+        <div class="card" style="border-left-color: #e74c3c;">
+            <h3 data-en="🛠️ WEAKNESS ANALYSIS" data-en="🛠️ WEAKNESS ANALYSIS">🛠️ SCHWACHSTELLEN-ANALYSE</h3>
+            <div id="radarFeedback" style="font-size:13px; color:#ccc; line-height: 1.5;" data-en="Rate your skills to receive feedback." data-en="Rate your skills to receive feedback.">Bewerte deine Skills, um Feedback zu erhalten.</div>
+        </div>
+        <button class="btn btn-white" style="margin-top:20px;" onclick="document.getElementById('radarSliders').style.display='block'" data-en="UPDATE SKILLS" data-en="UPDATE SKILLS">SKILLS AKTUALISIEREN</button>
+        <div id="radarSliders" class="radar-slider-box">
+            <h3 style="margin-top:0;" data-en="Rate your level (1-10)" data-en="Rate your level (1-10)">Bewerte dein Level (1-10)</h3>
+            <div class="slider-label"><span id="lbl_top" data-en="Skill 1">Skill 1</span><span id="val_top">5</span></div><input type="range" id="sl_top" min="1" max="10" value="5" oninput="updateRadarSl('top')">
+            <div class="slider-label"><span id="lbl_bot" data-en="Skill 2">Skill 2</span><span id="val_bot">5</span></div><input type="range" id="sl_bot" min="1" max="10" value="5" oninput="updateRadarSl('bot')">
+            <div class="slider-label"><span id="lbl_wre" data-en="Skill 3">Skill 3</span><span id="val_wre">5</span></div><input type="range" id="sl_wre" min="1" max="10" value="5" oninput="updateRadarSl('wre')">
+            <div class="slider-label"><span id="lbl_sub" data-en="Skill 4">Skill 4</span><span id="val_sub">5</span></div><input type="range" id="sl_sub" min="1" max="10" value="5" oninput="updateRadarSl('sub')">
+            <div class="slider-label"><span id="lbl_car" data-en="Cardio">Cardio</span><span id="val_car">5</span></div><input type="range" id="sl_car" min="1" max="10" value="5" oninput="updateRadarSl('car')">
+            <button class="btn btn-red" style="margin-top:15px; padding:15px; font-size:14px;" onclick="saveRadar()" data-en="SAVE" data-en="SAVE">SPEICHERN</button>
+        </div>
+        <button class="btn btn-dark" style="margin-top:20px;" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
+    </div>
+
+    <div id="view-log" class="view">
+        <h2 data-en="ANALYSIS DASHBOARD" data-en="ANALYSIS DASHBOARD">ANALYSE DASHBOARD</h2>
+        <div class="dash-container">
+            <div class="dash-box">
+                <div class="dash-label" data-en="TRAINING SESSIONS" data-en="TRAINING SESSIONS">TRAININGSEINHEITEN</div>
+                <div class="dash-val" id="dashTotalClasses">0</div>
+            </div>
+            <div class="dash-box" style="border-bottom-color: #3498db;">
+                <div class="dash-label" data-en="PERFORMANCE" data-en="PERFORMANCE">PERFORMANCE</div>
+                <div class="dash-val" id="dashScore" style="color:#3498db;">0%</div>
+            </div>
+        </div>
+        <button class="btn btn-white" style="font-size:14px; padding:15px; margin-bottom:20px;" onclick="evaluateMyGame()"><span class="icon">📊</span data-en="TRAINING DATA ANALYSIS" data-en="TRAINING DATA ANALYSIS">TRAININGS-DATEN ANALYSE</button>
+        <div id="evalBox"></div>
+        
+        <div class="card" style="border-left-color: #fff; margin-top:10px;">
+            <h3 data-en="1. LOG SESSION" data-en="1. LOG SESSION">1. EINHEIT LOGGEN</h3>
+            <button class="btn-sm btn-sm-radar" onclick="suggestFromRadar()" data-en="🎯 SUGGEST GOALS FROM SKILL RADAR" data-en="🎯 SUGGEST GOALS FROM SKILL RADAR">🎯 ZIELE AUS SKILL RADAR VORSCHLAGEN</button>
+            <label data-en="Date:" data-en="Date:">Datum:</label><input type="date" id="logDate">
+            
+            <label style="display:flex; justify-content:space-between; align-items:center;">
+                <span data-en="Goals today:" data-en="Goals today:">Ziele heute:</span>
+                <button class="btn-sm" style="margin:0; background:#333; color:#fff;" onclick="startDictation('logGoals')">🎤</button>
+            </label>
+            <div id="goalChipsBox" style="margin-bottom:8px;"></div>
+            <input type="text" id="logGoals" placeholder="Oder frei tippen..." data-en-ph="Or type freely...">
+
+            <div style="background: #222; padding: 12px; border-radius: 6px; margin-top: 15px; border: 1px solid #333; border-left: 3px solid var(--accent-color);">
+                <h4 style="margin: 0 0 5px 0; color: #fff; font-size: 12px;" data-en="✈️ TRAINING DIARY & ANALYSIS" data-en="✈️ TRAINING DIARY & ANALYSIS">✈️ TRAININGSTAGEBUCH & ANALYSE</h4>
+                <p style="font-size:10px; color:#aaa; margin-top:0; margin-bottom:12px;" data-en="Absolute honesty with yourself." data-en="Absolute honesty with yourself.">Absolute Ehrlichkeit mit dir selbst.</p>
+                
+                <label style="margin-top:0; color:#2ecc71; display:flex; justify-content:space-between; align-items:center;">
+                    <span data-en="🟢 ONE GOOD (What went well?)" data-en="🟢 ONE GOOD (What went well?)">🟢 ONE GOOD (Was lief stark?)</span>
+                    <button class="btn-sm" style="margin:0; background:#333; color:#fff;" onclick="startDictation('logGood')">🎤</button>
+                </label>
+                <input type="text" id="logGood" placeholder="z.B. Guard Pass Timing" data-en-ph="e.g. Guard Pass Timing" data-en-ph="e.g. Guard Pass Timing">
+                
+                <label style="margin-top:15px; color:#e74c3c; display:flex; justify-content:space-between; align-items:center;">
+                    <span data-en="🔴 ONE BAD (Mistakes?)" data-en="🔴 ONE BAD (Mistakes?)">🔴 ONE BAD (Fehler?)</span>
+                    <button class="btn-sm" style="margin:0; background:#333; color:#fff;" onclick="startDictation('logBad')">🎤</button>
+                </label>
+                <input type="text" id="logBad" placeholder="z.B. Sub-Defense vernachlässigt" data-en-ph="e.g. Neglected Sub-Defense" data-en-ph="e.g. Neglected Sub-Defense">
+
+                <label style="margin-top:20px; color:#3498db; border-top: 1px solid #444; padding-top: 15px;" data-en="⚙️ SYSTEM CHECK:" data-en="⚙️ SYSTEM CHECK:">⚙️ SYSTEM CHECK:</label>
+                <div class="eatit-row" style="margin-top: 5px; background: #1a1a1a; border: 1px solid #333;">
+                    <div class="eatit-item" id="chk_E" onclick="toggleCheck('E')"><span class="eatit-icon">💦</span><span data-en="EFFORT" data-en="EFFORT">EINSATZ</span></div>
+                    <div class="eatit-item" id="chk_M" onclick="toggleCheck('M')"><span class="eatit-icon">🧠</span><span data-en="MINDSET" data-en="MINDSET">MINDSET</span></div>
+                    <div class="eatit-item" id="chk_T1" onclick="toggleCheck('T1')"><span class="eatit-icon">⏱️</span><span data-en="CARDIO">CARDIO</span></div>
+                    <div class="eatit-item" id="chk_T2" onclick="toggleCheck('T2')"><span class="eatit-icon">🤝</span><span data-en="TEAM SPIRIT" data-en="TEAM SPIRIT">TEAMGEIST</span></div>
+                    <div class="eatit-item" id="chk_T3" onclick="toggleCheck('T3')"><span class="eatit-icon">🥋</span><span data-en="TECHNIQUE" data-en="TECHNIQUE">TECHNIK</span></div>
+                </div>
+            </div>
+            
+            <label style="margin-top:15px;" data-en="Focus / Sparring Position:" data-en="Focus / Sparring Position:">Fokus / Sparring Position:</label>
+            <select id="logPosition"></select>
+            
+            <label style="margin-top:15px;" data-en="Video Link (YouTube/Vimeo/Drive):" data-en="Video Link (YouTube/Vimeo/Drive):">Video Link (YouTube/Vimeo/Drive):</label>
+            <input type="url" id="logVideoUrl" placeholder="https://youtube.com/..." data-en-ph="https://youtube.com/..." data-en-ph="https://youtube.com/...">
+
+            <label style="margin-top:15px;" data-en="Photo (Whiteboard / Injury):" data-en="Photo (Whiteboard / Injury):">Foto (Whiteboard / Verletzung):</label>
+            <input type="file" id="logPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="previewPhoto(event)">
+            <button class="btn btn-dark" style="margin-top:5px; padding:15px; font-size:13px;" onclick="document.getElementById('logPhotoInput').click()"><span class="icon">📸</span data-en="ADD PHOTO">FOTO HINZUFÜGEN</button>
+            <img id="logPhotoPreview" class="log-img-preview">
+            
+            <button class="btn btn-red" style="margin-top:20px; font-size:14px; padding:15px;" onclick="saveTrainingLog()" data-en="SAVE LOG" data-en="SAVE LOG">LOG SPEICHERN</button>
+        </div>
+        
+        <div id="logHistoryBox" style="margin-top:20px;">
+            <h3 data-en="HISTORY" data-en="HISTORY">HISTORIE</h3>
+            <div id="logList"></div>
+        </div>
+
+        <h3 style="margin-top: 30px; border-top: 1px solid #333; padding-top: 15px;" data-en="DATA BACKUP" data-en="DATA BACKUP">DATENSICHERUNG</h3>
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-dark" style="flex:1; padding:15px; font-size:13px;" onclick="exportData()"><span class="icon">💾</span data-en="EXPORT">EXPORT</button>
+            <button class="btn btn-dark" style="flex:1; padding:15px; font-size:13px;" onclick="document.getElementById('importInput').click()"><span class="icon">📂</span data-en="IMPORT">IMPORT</button>
+            <input type="file" id="importInput" accept=".json" style="display:none;" onchange="importData(event)">
+        </div>
+        <button class="btn btn-dark" style="margin-top:20px;" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
+    </div>
+
+    <div id="view-gamefinder" class="view">
+        <h2 id="gfTitle" data-en="GAMEFINDER 2.0" data-en="GAMEFINDER 2.0">GAMEFINDER 2.0</h2>
+        
+        <div class="card" style="border-left-color: #3498db; margin-bottom: 20px;">
+            <h3 data-en="🎬 BASIC TECHNIQUES (VIDEO LIBRARY)" data-en="🎬 BASIC TECHNIQUES (VIDEO LIBRARY)">🎬 BASIC TECHNIKEN (VIDEO BIBLIOTHEK)</h3>
+            <p style="font-size:11px; color:#aaa; margin-top:0;" data-en="Save links to fundamental techniques of your gym here." data-en="Save links to fundamental techniques of your gym here.">Hinterlege hier Links zu fundamentalen Techniken deines Gyms.</p>
+            <input type="text" id="basicVideoName" placeholder="Titel (z.B. Armbar from Guard)" data-en-ph="Title (e.g. Armbar from Guard)" data-en-ph="Title (e.g. Armbar from Guard)">
+            <input type="url" id="basicVideoUrl" placeholder="Video URL (YouTube/Drive)" data-en-ph="Video URL (YouTube/Drive)" data-en-ph="Video URL (YouTube/Drive)">
+            <button class="btn-sm btn-sm-red" style="width:100%; padding:10px; margin-top:10px;" onclick="addBasicVideo()" data-en="+ ADD" data-en="+ ADD">+ HINZUFÜGEN</button>
+            
+            <div id="basicVideosList" style="margin-top: 15px;"></div>
+        </div>
+
+        <h3 style="border-top:1px solid #333; padding-top:15px;" data-en="GAMEFINDER CALCULATION" data-en="GAMEFINDER CALCULATION">GAMEFINDER BERECHNUNG</h3>
+        <div id="gf-dynamic-content"></div>
+        <button class="btn btn-white" onclick="calculateGamefinder()" data-en="CALCULATE" data-en="CALCULATE">BERECHNEN</button>
+        <div id="gf-result-box">
+            <button class="btn btn-dark" style="margin-bottom:15px; border-color:#27ae60; color:#2ecc71;" onclick="exportGamefinderToPlaybook()"><span class="icon">🗺️</span><span data-en="Export to Playbook">Ins Playbook exportieren</span></button><h3 style="color:#2ecc71;" data-en="✅ YOUR A-GAME:" data-en="✅ YOUR A-GAME:">✅ DEIN A-GAME:</h3><div id="gf-good-list"></div><h3 style="color:#e74c3c; margin-top:20px;" data-en="🛑 AVOID:" data-en="🛑 AVOID:">🛑 VERMEIDEN:</h3><div id="gf-bad-list"></div></div>
+        <button class="btn btn-dark" style="margin-top:20px;" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
+    </div>
+
+    <div id="view-camp" class="view">
+        <h2 id="campTitle" data-en="FIGHT CAMP PLANNER" data-en="FIGHT CAMP PLANNER">FIGHT CAMP PLANER</h2>
+        <div class="card" style="border-left-color: #fff; padding-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+        <label id="campDaysLabel" data-en="Days to weigh-in:" style="margin:0;">Tage bis zur Waage:</label>
+        <select id="campUnit" style="width:auto; padding:2px 5px;" onchange="updateCampUnitLabels()"><option value="kg">kg</option><option value="lbs">lbs</option></select>
+    </div>
+            <input type="number" id="campDays" placeholder="z.B. 42" data-en-ph="e.g. 42" data-en-ph="e.g. 42">
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1;"><label id="lblCurWt" data-en="Current (kg)">Aktuell (kg)</label><input type="number" id="campCurWt" step="0.1"></div>
+                <div style="flex:1;"><label id="lblTarWt" data-en="Target (kg)">Ziel (kg)</label><input type="number" id="campTarWt" step="0.1"></div>
+            </div>
+            <label data-en="Diet Type:" data-en="Diet Type:">Ernährungstyp:</label>
+            <select id="campDietType"><option value="omnivor" selected data-en="Omnivore">Omnivor</option><option value="pescetarisch" data-en="Pescetarian">Pescetarisch</option><option value="vegetarisch" data-en="Vegetarian" data-en="Vegetarian">Vegetarisch</option><option value="vegan" data-en="Vegan" data-en="Vegan">Vegan</option></select>
+            <label data-en="Eating Type (Satiety):" data-en="Eating Type (Satiety):">Ess-Typ (Sättigung):</label>
+            <div style="display:flex; align-items:center; gap:10px; margin-top:5px;"><span style="font-size:11px; color:#aaa;" data-en="Normal">Normal</span><input type="range" id="campVolume" min="1" max="5" value="3" style="flex:1;"><span style="font-size:11px; color:#aaa;" data-en="Volume-Eater">Volume-Eater</span></div>
+            <label style="margin-top:15px;" data-en="Activity Level:" data-en="Activity Level:">Pensum:</label>
+            <select id="campFreq"><option value="1.2" data-en="Sedentary">Sitzend</option><option value="1.55" selected data-en="Moderate (3-5x Week)">Moderat (3-5x Woche)</option><option value="1.75" data-en="High (6-8x Week)">Hoch (6-8x Woche)</option></select>
+            <label data-en="Diet Focus:" data-en="Diet Focus:">Diät Fokus:</label>
+            <select id="campDiet"><option value="balanced" data-en="Performance">Performance</option><option value="lowcarb" data-en="Low Carb">Low Carb</option></select>
+            <button class="btn btn-red" style="margin-top:20px;" onclick="calculateCamp()" data-en="CALCULATE" data-en="CALCULATE">BERECHNEN</button>
+        </div>
+        
+        <div id="campResultBox" style="display:none; margin-top:20px;">
+            <div class="camp-alert" id="campAlertBox"></div>
+            <div class="card" style="border-left-color: #e74c3c;">
+                <h3 style="margin-top:5px;" data-en="📊 MACROS (GRAMS/DAY)" data-en="📊 MACROS (GRAMS/DAY)">📊 MAKROS (GRAMM/TAG)</h3>
+                <div class="camp-stat-row"><span data-en="TDEE (Expenditure):">TDEE (Verbrauch):</span><span class="camp-stat-val" id="outTDEE"></span></div>
+                <div class="camp-stat-row"><span data-en="Target Calories:">Ziel-Kalorien:</span><span class="camp-stat-val" id="outTargetKcal"></span></div>
+                <div class="camp-stat-row" style="margin-top:10px;"><span data-en="🥩 Proteins:">🥩 Proteine:</span><span class="camp-stat-val" style="color:#3498db;" id="outProtein"></span></div>
+                <div class="camp-stat-row"><span data-en="🥑 Fats:">🥑 Fette:</span><span class="camp-stat-val" style="color:#f1c40f;" id="outFatGrams"></span></div>
+                <div class="camp-stat-row"><span data-en="🍚 Carbs:">🍚 Carbs:</span><span class="camp-stat-val" style="color:#2ecc71;" id="outCarbs"></span></div>
+            </div>
+            <div class="card" style="border-left-color: #3498db;" id="weightLossBox">
+                <h3 data-en="⚖️ WEIGHT LOSS" data-en="⚖️ WEIGHT LOSS">⚖️ GEWICHTSVERLUST</h3>
+                <div class="camp-stat-row"><span data-en="Last Week (Water):">Letzte Woche (Wasser):</span><span class="camp-stat-val" id="outWater"></span></div>
+                <div class="camp-stat-row"><span data-en="True Fat till then:">Echtes Fett bis dahin:</span><span class="camp-stat-val" id="outFat"></span></div>
+            </div>
+            
+            <button class="btn btn-white" style="margin-top:20px;" onclick="generateTrainingPlan()"><span class="icon">📅</span data-en="GENERATE TRAINING PLAN">TRAININGSPLAN GENERIEREN</button>
+            <div id="trainingPlanBox" style="margin-top:15px; display:none;"></div>
+
+            <div class="card" style="border-left-color: #fff;"><h3 style="margin-top:5px;" data-en="🏋️‍♂️ PERIODIZATION" data-en="🏋️‍♂️ PERIODIZATION">🏋️‍♂️ PERIODISIERUNG</h3><div id="outPhases"></div></div>
+        </div>
+        <button class="btn btn-dark" style="margin-top:20px;" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
+    </div>
+
+    <div id="view-timer" class="view">
+        <h2 data-en="SMART ROUND TIMER">SMART ROUND TIMER</h2>
+        <div class="preset-row">
+            <button class="preset-btn" onclick="setTimer(5, 1, 5)" data-en="MMA / BJJ">MMA / BJJ<br data-en="5x5 Min">5x5 Min</button>
+            <button class="preset-btn" onclick="setTimer(3, 1, 3)" data-en="KICKBOXING" data-en="KICKBOXING">KICKBOXEN<br data-en="3x3 Min">3x3 Min</button>
+            <button class="preset-btn" onclick="setTimer(0.33, 0.16, 8)" data-en="TABATA">TABATA<br data-en="20s / 10s">20s / 10s</button>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <div style="flex:1;"><label data-en="Work (Min)">Work (Min)</label><input type="number" id="t-work" value="5" step="0.1" min="0.1"></div>
+            <div style="flex:1;"><label data-en="Rest (Min)">Rest (Min)</label><input type="number" id="t-rest" value="1" step="0.1" min="0"></div>
+            <div style="flex:1;"><label data-en="Rounds">Runden</label><input type="number" id="t-rounds" value="5" min="1"></div>
+        </div>
+        <div style="background:#111; border-radius:8px; padding:20px; margin-top:20px; border: 2px solid #333;" id="timerBox">
+            <div class="round-display" id="roundDisplay" data-en="ROUND 1 / 5">RUNDE 1 / 5</div>
+            <div class="timer-display" id="timerDisplay">05:00</div>
+            <div id="phaseDisplay" style="text-align:center; font-size:12px; color:#888; font-weight:bold; letter-spacing:1px;" data-en="GET READY" data-en="GET READY">GET READY</div>
+        </div>
+        <p style="font-size:11px; color:#f1c40f; text-align:center; margin-top:10px; margin-bottom:15px;" data-en="⚠️ <strong>Important:</strong> The hardware mute switch on your phone must be disabled, otherwise the system blocks the sound. (Bluetooth speakers work out-of-the-box).">⚠️ <strong>Wichtig:</strong> Der Hardware-Stummschalter an deinem Handy muss deaktiviert sein, sonst blockiert das System den Ton. (Bluetooth Boxen funktionieren out-of-the-box).</p>
+        <button class="btn btn-white" style="margin-bottom:15px;" onclick="document.body.classList.toggle('force-landscape');" data-en="FORCE FULLSCREEN">🖥️ VOLLBILD ERZWINGEN</button>
+        <button class="btn btn-red" id="btnTimerStart" onclick="startRoundTimer()" data-en="START" data-en="START">STARTEN</button>
+        <button class="btn btn-dark" id="btnTimerStop" style="display:none; margin-top:15px;" onclick="stopRoundTimer()" data-en="CANCEL" data-en="CANCEL">ABBRECHEN</button>
+        <button class="btn btn-dark" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
+    </div>
+
+    <div id="view-events" class="view">
+        <h2 data-en="CALENDAR">KALENDER</h2>
+        <input type="text" id="evName" placeholder="Event-Name" data-en-ph="Event Name" data-en-ph="Event Name">
+        <div style="display:flex; gap:10px;">
+            <div style="flex:1;"><input type="date" id="evDate"></div>
+            <div style="flex:1;"><select id="evLevel"><option data-en="All Levels">Alle Level</option><option data-en="Beginner">Beginner</option><option data-en="Pro">Pro</option></select></div>
+        </div>
+        <button class="btn btn-red" onclick="addEvent()" data-en="REGISTER" data-en="REGISTER">EINTRAGEN</button>
+        <div id="eventList" style="margin-top:20px;"></div>
+        <button class="btn btn-dark" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
+    </div>
+
+    <div id="view-rules" class="view">
+        <h2 data-en="🏆 Rulesets & Federations" data-en="🏆 Rulesets & Federations">🏆 Regelwerke & Verbände</h2>
+        <div class="card">
+            <label data-en="Ruleset / Federation:">Regelwerk / Verband:</label>
+            <select id="ruleSport" onchange="handleSportChange()">
+                </select>
+
+            <div id="wrapperRuleAge" style="margin-top: 10px;">
+                <label data-en="Age Class:">Altersklasse:</label>
+                <select id="ruleAge" onchange="handleAgeChange()">
+                    <option value="adult" selected data-en="Adult / Master (18+ Years)">Adult / Master (18+ Jahre)</option>
+                    <option value="kids" data-en="Kids / Juveniles (Under 18 Years)">Kids / Juveniles (Unter 18 Jahre)</option>
+                </select>
+            </div>
+
+            <div id="wrapperRuleBelt" style="margin-top: 10px;">
+                <label data-en="Belt / Experience:">Gürtel / Erfahrung:</label>
+                <select id="ruleBelt" onchange="updateRules()">
+                    </select>
+            </div>
+
+            <div id="rulesResult" style="margin-top:20px; font-size:14px; line-height:1.6; background: #2a2a2a; padding: 15px; border-radius: 8px;">
+                </div>
+                
+            <button class="btn btn-red" style="margin-top:15px; width:100%;" onclick="toggleCustomRuleEditor()" data-en="+ CREATE CUSTOM RULESET">+ EIGENES REGELWERK ERSTELLEN</button>
+            
+            <div id="customRuleEditor" style="display:none; margin-top:20px; background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333;">
+                <h3 style="margin-bottom:10px; color:#e74c3c;" data-en="New Ruleset">Neues Regelwerk</h3>
+                <label data-en="Name of the Tournament:">Name des Turniers:</label>
+                <input type="text" id="cr_name" placeholder="z.B. Interne Gym Meisterschaft" data-en-ph="e.g. Internal Gym Championship" style="margin-bottom: 10px;">
+                <label data-en="Rules (Adult White Belt):">Regeln (Adult White Belt):</label>
+                <textarea id="cr_adult_white" placeholder="Matchzeit, Erlaubte Submissions..." data-en-ph="Match Time, Allowed Submissions..." style="margin-bottom: 10px;"></textarea>
+                <label data-en="Rules (Adult Blue Belt):">Regeln (Adult Blue Belt):</label>
+                <textarea id="cr_adult_blue" placeholder="Matchzeit, Erlaubte Submissions..." data-en-ph="Match Time, Allowed Submissions..." style="margin-bottom: 10px;"></textarea>
+                <label data-en="Rules (Adult Purple Belt):">Regeln (Adult Purple Belt):</label>
+                <textarea id="cr_adult_purple" placeholder="Matchzeit, Erlaubte Submissions..." data-en-ph="Match Time, Allowed Submissions..." style="margin-bottom: 10px;"></textarea>
+                <label data-en="Rules (Adult Brown Belt):">Regeln (Adult Brown Belt):</label>
+                <textarea id="cr_adult_brown" placeholder="Matchzeit, Erlaubte Submissions..." data-en-ph="Match Time, Allowed Submissions..." style="margin-bottom: 10px;"></textarea>
+                <label data-en="Rules (Adult Black Belt):">Regeln (Adult Black Belt):</label>
+                <textarea id="cr_adult_black" placeholder="Matchzeit, Erlaubte Submissions..." data-en-ph="Match Time, Allowed Submissions..." style="margin-bottom: 10px;"></textarea>
+                <label data-en="Rules (Kids / All Classes):">Regeln (Kids / Alle Klassen):</label>
+                <textarea id="cr_kids" placeholder="Besondere Einschränkungen für Kids..." data-en-ph="Special restrictions for Kids..." style="margin-bottom: 10px;"></textarea>
+                
+                <button class="btn btn-red" style="width:100%;" onclick="saveCustomRule()" data-en="SAVE" data-en="SAVE">SPEICHERN</button>
+                <button class="btn btn-dark" style="width:100%; margin-top: 10px;" onclick="toggleCustomRuleEditor()" data-en="CANCEL" data-en="CANCEL">ABBRECHEN</button>
+            </div>
+        </div>
+        <button class="btn btn-dark" style="margin-top:20px;" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
+    </div>
+
+    <div id="view-manifest" class="view">
+        <h2 data-en="📋 CORNER INFO / FIGHTER PASSPORT">📋 CORNER INFO / FIGHTER PASSPORT</h2>
+        <p style="font-size:11px; color:#aaa; text-align:center; margin-bottom: 20px;" data-en="All critical medical and administrative data instantly accessible.">Alle kritischen medizinischen und administrativen Daten im direkten Zugriff.</p>
+
+        <div class="card" style="border-left-color: #e74c3c; background: #151515;">
+            <div id="manifestReadOnlyContent" style="font-size:13px; color:#eee; line-height:1.6;">
+                </div>
+        </div>
+
+        <button class="btn btn-white" style="width: 100%; padding: 15px; font-size: 13px;" onclick="exportCornerToCoach()"><span class="icon">📲</span data-en="EXPORT FILE VIA WHATSAPP">AKTE PER WHATSAPP EXPORTIEREN</button>
+        <button class="btn btn-dark" style="margin-top:15px; width: 100%;" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
+    </div>
+    
+    <div id="view-shop" class="view">
+        <h2 data-en="LINKS & ACADEMY">LINKS & ACADEMY</h2>
+        
+        <div id="teamWaGroupCard" class="card" style="border-left-color: #2ecc71; margin-bottom: 20px; display: none;">
+            <h3 style="margin-top:0;" data-en="💬 TEAM COMMUNICATION">💬 TEAM KOMMUNIKATION</h3>
+            <p style="font-size:11px; color:#ccc; margin-top:0;" data-en="Join your team's official WhatsApp group to not miss any updates.">Tritt der offiziellen WhatsApp-Gruppe deines Teams bei, um keine Updates zu verpassen.</p>
+            <button class="btn btn-white" id="btnJoinWaGroup" style="width:100%; margin-top:10px;" data-en="JOIN WHATSAPP GROUP">WHATSAPP GRUPPE BEITRETEN</button>
+        </div>
+
+        <div id="dynamicLinksBox">
+            <a href="https://drive.google.com/drive/folders/10r-OPRRbqVRjCtOJFmZSs3ZIvra0yVPg" target="_blank" class="btn btn-white" data-en="🎬 DRIVE SEMINARS">🎬 DRIVE SEMINARE</a>
+            <a href="https://campus.grofs.de/reg/kursseite/umgang-mit-stalking/" target="_blank" class="btn btn-red" data-en="🛡️ SELF-DEFENSE">🛡️ SELBSTVERTEIDIGUNG</a>
+            <a href="https://chokeandchill.com/" target="_blank" class="btn btn-dark" data-en="🥋 CHOKE & CHILL">🥋 CHOKE & CHILL</a>
+        </div>
+        <button class="btn btn-dark" style="margin-top:20px;" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
+    </div>
+
+    <div id="view-survey" class="view">
+        <h2 data-en="TEAM SURVEY & CLIMATE">TEAM UMFRAGE & KLIMA</h2>
+        <p style="font-size:11px; color:#aaa; text-align:center;" data-en="Bi-annual feedback for a strong team">Halbjährliches Feedback für ein starkes Team</p>
+        
+        <div class="card" style="border-left-color: var(--accent-color); margin-bottom: 20px;">
+            <p style="font-size:12px; color:#fff; font-weight:bold; line-height:1.4;" data-en="This feedback is absolutely anonymous. It serves solely to strengthen the club climate and to de-escalate potential conflicts early and fairly. No one will be disadvantaged by honest answers.">Dieses Feedback ist absolut anonym. Es dient ausschließlich dazu, das Vereinsklima zu stärken und potenzielle Konflikte frühzeitig und fair zu entschärfen. Niemand wird durch ehrliche Antworten benachteiligt.</p>
+            <p style="font-size:12px; color:#ccc; border-top:1px solid #444; padding-top:10px;" data-en="Rate the following 15 core questions on a scale from 1 (Does not apply at all) to 5 (Fully applies).">Bewerte die folgenden 15 Kernfragen auf einer Skala von 1 (Trifft gar nicht zu) bis 5 (Trifft voll zu).</p>
+            <div id="surveyQuestionsBox" style="margin-top:15px;"></div>
+            
+            <label style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+                <span data-en="Free Text Feedback (Optional):">Freitext Feedback (Optional):</span>
+                <button class="btn-sm" style="margin:0; background:#333; color:#fff;" onclick="startDictation('surveyFeedback')">🎤</button>
+            </label>
+            <textarea id="surveyFeedback" placeholder="Was brennt dir sonst auf der Seele?" data-en-ph="What else is on your mind?"></textarea>
+
+            <label style="margin-top:15px; color:#3498db;" data-en="Your Name (Optional, if not anonymous):">Dein Name (Optional, falls nicht anonym):</label>
+            <input type="text" id="surveyName" placeholder="Max Mustermann" data-en-ph="John Doe" data-en-ph="John Doe">
+
+            <label style="margin-top:15px; display:flex; align-items:center; gap:10px; color:#fff; font-size:13px; text-transform:none; font-weight:normal; cursor:pointer;">
+                <input type="checkbox" id="surveyContact" style="width:20px; margin:0; accent-color:#e74c3c;" data-en="I want the coach to contact me regarding my feedback.">Ich möchte, dass der Coach bzgl. meines Feedbacks Kontakt mit mir aufnimmt.</label>
+
+            <button class="btn btn-red" style="margin-top:20px;" onclick="submitSurvey()" data-en="SUBMIT SURVEY">UMFRAGE ABSENDEN</button>
+        </div>
+        <button class="btn btn-dark" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
+    </div>
+
+    <div id="view-about" class="view">
+        <h2 data-en="ABOUT THE APP" data-en="ABOUT THE APP">ÜBER DIE APP</h2>
+        
+        <div class="card" style="border-left-color: var(--primary-color);">
+            <h3 style="margin-top:5px;" data-en="About the Project">Über das Projekt</h3>
+            <p style="font-size:13px; color:#ccc; line-height:1.5;" data-en="Developed from practice for practice. GrAPP is based on the Aviation Model and brings objective error culture and structure to the martial arts mat.">Entwickelt aus der Praxis für die Praxis. GrAPP basiert auf dem Aviation-Modell und bringt objektive Fehlerkultur und Struktur auf die Kampfsport-Matte.</p>
+        </div>
+
+        <!-- GAMIFICATION SHARING CARD -->
+        <div class="card" style="border-left-color: #9b59b6; text-align: center;">
+            <h3 style="margin-top:5px;">🚀 Teile die App & Sammle Patches!</h3>
+            <p style="font-size:13px; color:#ccc; line-height:1.5; margin-bottom: 15px;">Lade deine Trainingspartner ein und schalte exklusive Referral-Trophäen frei. Dein persönlicher Einladungslink ist fertig:</p>
+            
+            <input type="text" id="referralLinkInput" readonly style="color:#aaa; text-align:center; margin-bottom: 15px; font-size:12px; background:#111; border:1px solid #333;" value="">
+            
+            <div style="display:flex; gap:10px; margin-bottom: 15px;">
+                <button class="btn btn-red" style="flex:1; padding: 12px; background:#2980b9; border:none;" onclick="shareReferralLink()">🔗 LINK TEILEN</button>
+                <button class="btn btn-dark" style="flex:1; padding: 12px;" onclick="showReferralQRCode()">📱 QR-CODE ZEIGEN</button>
+            </div>
+            
+            <div id="referralQrBox" style="display:none; background:#fff; padding:15px; border-radius:8px; margin: 0 auto; width: fit-content;">
+                <img id="referralQrImg" src="" alt="QR Code" style="width:200px; height:200px; display:block;">
+                <p style="color:#333; font-weight:bold; font-size:12px; margin-top:10px; margin-bottom:0;">Lass diesen Code von einem Freund scannen!</p>
+            </div>
+        </div>
+
+        <div class="card" style="border-left-color: #f1c40f;">
+            <h3 style="margin-top:5px;" data-en="Become a Sponsor">🏆 Werde Sponsor der GrAPP</h3>
+            <p style="font-size:13px; color:#ccc; line-height:1.5;">Unterstütze die Entwicklung und sichere dir deinen Platz in der Hall of Fame auf dem Dashboard! Egal ob als Privatperson (White Belt für einen Kaffee) oder als Gym (Red Belt Hero Spot).</p>
+            <p style="font-size:13px; color:#ccc; line-height:1.5; margin-top:10px;">Überweise einfach deinen gewünschten Betrag via Banküberweisung (siehe unten) oder PayPal/Apple Pay. Melde dich danach mit deinem Wunschnamen/Spruch bei Martin (Kontakt ganz unten), um sofort in die Hall of Fame aufgenommen zu werden!</p>
+            
+            <div style="background:#111; padding:15px; border-radius:6px; margin-top:15px; border-left:3px solid #e74c3c;">
+                <strong style="color:#e74c3c; font-size:12px;">WICHTIGER DISCLAIMER:</strong>
+                <p style="font-size:11px; color:#aaa; line-height:1.4; margin-top:5px;">Die GrAPP steht für eine offene, respektvolle und tolerante Mattenkultur. Wir behalten uns das Recht vor, Sponsoring-Anfragen ohne Angabe von Gründen abzulehnen und den Betrag vollständig zurückzuerstatten, falls die verlinkten Inhalte, Organisationen oder Personen gegen unsere Community-Werte verstoßen (z. B. bei Extremismus, Diskriminierung oder Hassrede). Ebenso können bestehende Sponsorings nachträglich widerrufen werden.</p>
+            </div>
+        </div>
+
+        <div class="card" style="border-left-color: #2ecc71;">
+            <h3 style="margin-top:5px;" data-en="Support the Crew">Support the Crew</h3>
+            <p style="font-size:13px; color:#ccc; line-height:1.5;" data-en="This app is completely free and ad-free. If it helps your gym, we appreciate a support for our team fund!">Diese App ist komplett kostenlos und werbefrei. Wenn sie eurem Gym hilft, freuen wir uns über einen Support für unsere Team-Kasse!</p>
+            
+            <label style="margin-top:15px;" data-en="Support via Bank Transfer (IBAN):">Support via Überweisung (IBAN):</label>
+            <input type="text" value="DE27 7606 9553 0001 0401 38" readonly style="color:#aaa; text-align:center; margin-bottom: 15px;">
+
+            <div style="text-align: center; margin-top: 10px;">
+                <p style="font-size:11px; color:#aaa; margin-bottom: 8px;" data-en="Or simply scan with your banking app (custom amount):">Oder einfach mit der Banking-App scannen (Betrag frei wählbar):</p>
+                <div id="giroCodeBox" style="background:#fff; padding:10px; display:inline-block; border-radius:8px; margin-bottom:15px;"></div>
+                
+                <button class="btn btn-red" style="font-size: 13px; padding: 12px; width: 100%; margin-top: 5px;" onclick="triggerDonationNextSteps()" data-en="🎉 I DONATED!">🎉 ICH HABE GESPENDET!</button>
+
+                <div style="border-top: 1px dotted #444; margin-top: 20px; padding-top: 15px;">
+                    <p style="font-size:11px; color:#f1c40f; margin-bottom: 10px;" data-en="INTERNATIONAL SUPPORT (Credit Card / Apple Pay):">INTERNATIONAL SUPPORT (Credit Card / Apple Pay):</p>
+                    <a href="https://buymeacoffee.com/martinkremmel" target="_blank" class="btn btn-white" style="font-size: 13px; padding: 12px; width: 100%; text-decoration: none; display: block;" data-en="☕ BUY ME A COFFEE">☕ BUY ME A COFFEE</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="border-left-color: #555;">
+            <h3 style="margin-top:5px;" data-en="Imprint / Legal">Impressum / Legal</h3>
+            <p style="font-size:11px; color:#888; line-height:1.5;">Name: Martin Kremmel <br>Adresse: Mariahilfstrasse 3, 92318 Neumarkt<br>Kontakt: E-Mail: m.kremmel@mail.de; Telefon:+49176 310 96 222</p>
+        </div>
+
+        <button class="btn btn-dark" style="margin-top:20px;" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
+    </div>
+
+    <div id="view-breathing-hub" class="view">
+        <div id="matSurvivalGatekeeper" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(200,0,0,0.95); z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:20px; text-align:center;">
+            <h1 style="color:white; font-size:40px; margin-bottom:20px;" data-en="⚠️ ATTENTION">⚠️ ACHTUNG</h1>
+            <p style="color:white; font-size:16px; line-height:1.5; font-weight:bold;" data-en="Danger of fainting. Do not simulate physical chokes. Perform exercises exclusively while sitting or lying down!">Gefahr von Ohnmacht. Keine physischen Chokes simulieren. Übungen ausschließlich im Sitzen oder Liegen durchführen!<br><br data-en="⚡ EPILEPSY WARNING: Certain modules use bright strobe effects. Do not use if light-sensitive!">⚡ EPILEPSIE-WARNUNG: Bestimmte Module ("Cognitive Disturber" für Purple Belts) nutzen grelle Strobe-Effekte. Bei Lichtempfindlichkeit nicht verwenden!</p>
+            <button class="btn btn-dark" style="margin-top:30px; border:2px solid white;" onclick="acceptBreathingGatekeeper()" data-en="I UNDERSTAND">ICH HABE VERSTANDEN</button>
+        </div>
+
+        <h2 data-en="🫁 MAT SURVIVAL">🫁 MAT SURVIVAL</h2>
+        <p style="font-size:12px; color:#aaa; margin-bottom:15px; text-align:center;" data-en="The software in the mind beats the hardware of the body.">Die Software im Kopf schlägt die Hardware des Körpers.</p>
+
+        <div id="breathingModulesList">
+            <!-- GRAPPLING -->
+            <div class="card breathing-card" data-sport="grappling mma" onclick="openBreathingActive('deep_water')" style="cursor:pointer; border-left-color:#3498db;">
+                <h3 style="color:#3498db;" data-en="The Deep Water Protocol">The Deep Water Protocol</h3>
+                <p style="font-size:12px; color:#ccc;" data-en="Half-Lung Hold. Simulation of a Blood Choke.">Half-Lung Hold. Simulation eines Blood Chokes.</p>
+            </div>
+            <div class="card breathing-card" data-sport="grappling mma" onclick="openBreathingActive('guillotine')" style="cursor:pointer; border-left-color:#e67e22;">
+                <h3 style="color:#e67e22;" data-en="Guillotine Simulator">Guillotine Simulator</h3>
+                <p style="font-size:12px; color:#ccc;" data-en="Airway Crush. Trains "Sipping" (millimeter-precise breathing).">Airway Crush. Trainiert "Sipping" (millimetergenaues Atmen).</p>
+            </div>
+            <div class="card breathing-card" data-sport="grappling mma" onclick="openBreathingActive('pressure_escape')" style="cursor:pointer; border-left-color:#9b59b6;">
+                <h3 style="color:#9b59b6;" data-en="The Pressure Escape">The Pressure Escape</h3>
+                <p style="font-size:12px; color:#ccc;" data-en="Negative Pressure Blind Hold. Mount/Knee on Belly Survival.">Negative Pressure Blind Hold. Mount/Knee on Belly Survival.</p>
+            </div>
+            <div class="card breathing-card" data-sport="grappling mma" onclick="openBreathingActive('corner_reset_box')" style="cursor:pointer; border-left-color:#2ecc71;">
+                <h3 style="color:#2ecc71;" data-en="The Corner Reset (Grappling)">The Corner Reset (Grappling)</h3>
+                <p style="font-size:12px; color:#ccc;" data-en="Box-Breathing (4-4-4-4) for pulse control.">Box-Breathing (4-4-4-4) zur Pulskontrolle.</p>
+            </div>
+
+            <!-- STRIKING -->
+            <div class="card breathing-card" data-sport="striking mma" onclick="openBreathingActive('impact_reset')" style="cursor:pointer; border-left-color:#e74c3c; display:none;">
+                <h3 style="color:#e74c3c;" data-en="The Impact Reset">The Impact Reset</h3>
+                <p style="font-size:12px; color:#ccc;" data-en="Solar Plexus Shock. Gasping-technique (2x Sniff, 1x Out).">Solar Plexus Shock. Gasping-Technik (2x Sniff, 1x Out).</p>
+            </div>
+            <div class="card breathing-card" data-sport="striking mma" onclick="openBreathingActive('adrenaline_dump')" style="cursor:pointer; border-left-color:#f1c40f; display:none;">
+                <h3 style="color:#f1c40f;" data-en="Adrenaline Dump Protocol">Adrenaline Dump Protocol</h3>
+                <p style="font-size:12px; color:#ccc;" data-en="Wim Hof / Basecamp (Mic-Controlled Hands-Free!).">Wim Hof / Basecamp (Mic-Controlled Hands-Free!).</p>
+            </div>
+            <div class="card breathing-card" data-sport="striking mma" onclick="openBreathingActive('corner_reset_high')" style="cursor:pointer; border-left-color:#e74c3c; display:none;">
+                <h3 style="color:#e74c3c;" data-en="The Corner Reset (High Intensity)">The Corner Reset (High Intensity)</h3>
+                <p style="font-size:12px; color:#ccc;" data-en="Aggressive Pacer for 60s ring break.">Aggressiver Pacer für 60s Ringpause.</p>
+            </div>
+            
+            <!-- MMA -->
+            <div class="card breathing-card" data-sport="mma" onclick="openBreathingActive('cage_wall')" style="cursor:pointer; border-left-color:#1abc9c; display:none;">
+                <h3 style="color:#1abc9c;" data-en="Cage-Wall Drill">Cage-Wall Drill</h3>
+                <p style="font-size:12px; color:#ccc;" data-en="Pre-load + immediate Deep Water Hold.">Vorbelastung + sofortiger Deep Water Hold.</p>
+            </div>
+        </div>
+
+        <button class="btn btn-dark" style="margin-top:20px;" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
+    </div>
+
+    <div id="view-breathing-active" class="view" style="background:black;">
+        <div id="strobeOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:100; display:none; pointer-events:none;"></div>
+        <div style="position:relative; z-index:101; text-align:center; padding-top:20px;">
+            <h2 id="activeBreathTitle" style="color:var(--primary-color); margin-bottom:5px;" data-en="Module">Modul</h2>
+            <p id="activeBreathDesc" style="font-size:12px; color:#aaa; margin-bottom:20px;" data-en="Description">Beschreibung</p>
+            
+            <div id="stressorSelection" style="background:#111; padding:15px; border-radius:8px; margin-bottom:20px;">
+                <label style="color:#e74c3c;" data-en="Stressor (Pre-load):">Stressor (Vorbelastung):</label>
+                <select id="activeStressor">
+                    <option value="none" data-en="No Pre-load">Keine Vorbelastung</option>
+                    <option value="30s" data-en="30 Sec. Wall-Sit / Burpees">30 Sek. Wall-Sit / Burpees</option>
+                    <option value="60s" data-en="60 Sec. Max Output">60 Sek. Max Output</option>
+                </select>
+                
+                <label style="color:#f1c40f; margin-top:15px;" data-en="Your Weight Class (for calibration):">Deine Gewichtsklasse (für Kalibrierung):</label>
+                <select id="activeWeight">
+                    <option value="light" data-en="Lightweight (up to 70kg)">Leichtgewicht (bis 70kg)</option>
+                    <option value="mid" selected data-en="Middleweight (70 - 90kg)">Mittelgewicht (70 - 90kg)</option>
+                    <option value="heavy" data-en="Heavyweight (over 90kg)">Schwergewicht (über 90kg)</option>
+                </select>
+            </div>
+
+            <div id="breathUI" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:300px; padding:20px;">
+                <!-- Dynamisches UI per JS injiziert (Pacer, Timer, Audio-Feedback) -->
+            </div>
+
+            <div id="cognitiveDisturber" style="display:none; background:#222; border:2px solid #e74c3c; padding:15px; border-radius:8px; margin-bottom:20px;">
+                <h4 style="color:#e74c3c; margin-bottom:10px;" data-en="FOCUS TEST">FOKUS TEST</h4>
+                <p id="cogQuestion" style="font-size:14px; margin-bottom:15px;"></p>
+                <div id="cogAnswers" style="display:flex; flex-direction:column; gap:10px;"></div>
+            </div>
+
+            <button class="btn btn-red" id="btnBreathAction" style="width:100%; padding:20px; font-size:20px;" onclick="startBreathModule()" data-en="START" data-en="START">START</button>
+            <button class="btn btn-dark" style="width:100%; margin-top:15px;" onclick="abortBreathModule()" data-en="CANCEL & BACK" data-en="CANCEL & BACK">ABBRUCH & ZURÜCK</button>
+        </div>
+    </div>
+
+<!-- WAIVER MODAL -->
+<div id="waiverModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; overflow-y:auto;">
+    <div style="background:#111; max-width:500px; margin:20px auto; border-radius:12px; padding:20px; border:1px solid #333; position:relative;">
+        <button onclick="closeWaiverModal()" style="position:absolute; top:15px; right:15px; background:none; border:none; color:#e74c3c; font-size:20px; font-weight:bold; cursor:pointer;">X</button>
+        <h2 style="color:#e67e22; margin-top:0;" data-en="TRIAL WAIVER" data-en="TRIAL WAIVER">HAFTUNGSAUSSCHLUSS</h2>
+        
+        <div id="waiverTextDisplay" style="background:#222; padding:15px; border-radius:6px; font-size:12px; color:#ccc; max-height:300px; overflow-y:auto; margin-bottom:20px; white-space:pre-wrap; border:1px solid #444;">
+            <!-- Text comes from JS -->
+        </div>
+
+        <h4 style="margin-bottom:10px;" data-en="Digital Signature:">Digitale Unterschrift:</h4>
+        <div style="border: 2px dashed #444; border-radius: 8px; background: #eee; text-align: center; position: relative;">
+            <canvas id="signatureCanvas" width="100" height="150" style="width: 100%; height: 150px; display: block; touch-action: none;"></canvas>
+            <button onclick="clearSignature()" style="position:absolute; bottom:5px; right:5px; background:rgba(0,0,0,0.5); color:#fff; border:none; padding:5px 10px; border-radius:4px; font-size:10px;" data-en="CLEAR" data-en="CLEAR">LÖSCHEN</button>
+        </div>
+        
+        <div id="waiverActions" style="margin-top:20px;">
+            <button class="btn btn-red" style="width:100%; padding:15px; background:#2ecc71; border:none; font-size:14px;" onclick="saveWaiver()" data-en="SIGN & SAVE" data-en="SIGN & SAVE">UNTERSCHREIBEN & SPEICHERN</button>
+        </div>
+        
+        <div id="waiverExportActions" style="display:none; margin-top:20px; background:#222; padding:15px; border-radius:8px;">
+            <h4 style="color:#2ecc71; margin-top:0;" data-en="✅ Saved successfully!" data-en="✅ Saved successfully!">✅ Erfolgreich gespeichert!</h4>
+            <p style="font-size:11px; color:#aaa; margin-bottom:15px;" data-en="The app has no central server. Please send a copy as proof to your coach!">Die App hat keinen zentralen Server. Bitte sende eine Kopie als Beweis an deinen Coach!</p>
+            <div id="btnWaiverWebhookContainer" style="display:none; margin-bottom:10px;">
+                <button class="btn btn-white" style="width:100%; padding:12px; background:#e67e22; color:#fff; border:none;" onclick="exportWaiverWebhook()" data-en="☁️ SEND TO CLUB SYSTEM" data-en="☁️ SEND TO CLUB SYSTEM">☁️ AN VEREINSSYSTEM SENDEN</button>
+            </div>
+            <button class="btn btn-red" style="width:100%; padding:12px; margin-bottom:10px;" onclick="exportWaiverWhatsApp()" data-en="📲 SEND TO COACH VIA WHATSAPP" data-en="📲 SEND TO COACH VIA WHATSAPP">📲 PER WHATSAPP AN COACH SENDEN</button>
+            <button class="btn btn-dark" style="width:100%; padding:12px;" onclick="closeWaiverModal()" data-en="CLOSE">SCHLIESSEN</button>
+        </div>
+    </div>
+</div>
+
+<!-- KIOSK MODAL (PROBETRAINING) -->
+<div id="kioskModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:10000; overflow-y:auto;">
+    <div style="background:#111; max-width:500px; margin:20px auto; border-radius:12px; padding:20px; border:2px solid #e67e22; position:relative;">
+        <button onclick="closeKioskMode()" style="position:absolute; top:15px; right:15px; background:none; border:none; color:#e74c3c; font-size:20px; font-weight:bold; cursor:pointer;">X</button>
+        <h2 style="color:#e67e22; margin-top:0;" data-en="🤝 TRIAL TRAINING">🤝 PROBETRAINING</h2>
+        <p style="font-size:11px; color:#aaa; margin-bottom:20px;" data-en="Welcome! Please fill out these details quickly so you can join the training." data-en="Welcome! Please fill out these details quickly so you can join the training.">Willkommen! Bitte fülle diese Daten kurz aus, damit du mittrainieren kannst.</p>
+        
+        <label style="display:flex; justify-content:space-between; align-items:center;">
+            <span data-en="Your First and Last Name:" data-en="Your First and Last Name:">Dein Vor- und Nachname:</span>
+            <button type="button" class="btn-sm" style="margin:0; background:#333; color:#fff; padding:2px 6px;" onclick="startDictation('kioskName')">🎤</button>
+        </label>
+        <input type="text" id="kioskName" placeholder="Max Mustermann" data-en-ph="John Doe" data-en-ph="John Doe" oninput="checkKioskAgeLogic()">
+        
+        <label data-en="Your Birthdate:" data-en="Your Birthdate:">Dein Geburtsdatum:</label>
+        <input type="date" id="kioskBirthdate" onchange="checkKioskAgeLogic()" onclick="if(this.showPicker) this.showPicker()">
+        
+        <label style="display:flex; justify-content:space-between; align-items:center;">
+            <span data-en="Emergency Phone (e.g., Parents / Partner):" data-en="Emergency Phone (e.g. Parents / Partner):">Notfall-Rufnummer (z.B. Eltern / Partner):</span>
+            <button type="button" class="btn-sm" style="margin:0; background:#333; color:#fff; padding:2px 6px;" onclick="startDictation('kioskEmergencyPhone')">🎤</button>
+        </label>
+        <input type="text" id="kioskEmergencyPhone" placeholder="+49176...">
+
+        <!-- U18 Box im Kiosk -->
+        <div id="kioskU18Box" class="card" style="border-left-color: #f1c40f; display: none; margin-top:20px; background:#1a1a1a;">
+            <h3 style="color: #f1c40f;" data-en="🛡️ YOUTH PROTECTION (U18)" data-en="🛡️ YOUTH PROTECTION (U18)">🛡️ JUGENDSCHUTZ (U18)</h3>
+            <p style="font-size: 11px; color: #ccc; margin-bottom: 12px;" data-en="Since you are under 18, we need quick approval from your parents." data-en="Since you are under 18, we need quick approval from your parents.">Da du noch keine 18 bist, brauchen wir kurz das OK deiner Eltern.</p>
+            
+            <label style="display:flex; justify-content:space-between; align-items:center;">
+                <span data-en="Name of a Parent:" data-en="Name of a Parent:">Name eines Elternteils:</span>
+                <button type="button" class="btn-sm" style="margin:0; background:#333; color:#fff; padding:2px 6px;" onclick="startDictation('kioskParentName')">🎤</button>
+            </label>
+            <input type="text" id="kioskParentName" placeholder="Vor- und Nachname" data-en-ph="First and Last Name" data-en-ph="First and Last Name">
+            
+            <label style="display:flex; justify-content:space-between; align-items:center;">
+                <span data-en="WhatsApp Number (Mom / Dad 1):" data-en="WhatsApp Number (Mom / Dad 1):">WhatsApp-Nummer (Mama / Papa 1):</span>
+                <button type="button" class="btn-sm" style="margin:0; background:#333; color:#fff; padding:2px 6px;" onclick="startDictation('kioskParentPhone')">🎤</button>
+            </label>
+            <input type="text" id="kioskParentPhone" placeholder="+49176..." onchange="copyKioskParentPhone()">
+
+            <label style="display:flex; justify-content:space-between; align-items:center;">
+                <span data-en="WhatsApp Number (Mom / Dad 2) (Optional):" data-en="WhatsApp Number (Mom / Dad 2) (Optional):">WhatsApp-Nummer (Mama / Papa 2) (Optional):</span>
+                <button type="button" class="btn-sm" style="margin:0; background:#333; color:#fff; padding:2px 6px;" onclick="startDictation('kioskParentPhone2')">🎤</button>
+            </label>
+            <input type="text" id="kioskParentPhone2" placeholder="+49151...">
+            
+            <div style="background:#222; padding:10px; border-radius:6px; border:1px solid #444; margin-top:10px;">
+                <p style="font-size:11px; color:#aaa; margin:0 0 10px 0;" data-en="Are your parents <b>not</b> on site right now? Send them a link for a digital signature!">Sind deine Eltern gerade <b data-en="not">nicht</b> vor Ort? Schick ihnen schnell einen Link zur digitalen Unterschrift!</p>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn btn-white" style="flex:1; font-size:11px; padding:10px; background:#3498db; color:#fff; border:none;" onclick="sendRemoteConsentLink(1)" data-en="📲 SEND TO NO. 1" data-en="📲 SEND TO NO. 1">📲 AN NR. 1 SENDEN</button>
+                    <button class="btn btn-white" style="flex:1; font-size:11px; padding:10px; background:#2980b9; color:#fff; border:none;" onclick="sendRemoteConsentLink(2)" data-en="📲 SEND TO NO. 2" data-en="📲 SEND TO NO. 2">📲 AN NR. 2 SENDEN</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top:30px; border-top:1px solid #444; padding-top:20px;">
+            <h3 style="color:#e67e22; margin-top:0; text-align:center;" data-en="TRIAL WAIVER" data-en="TRIAL WAIVER">HAFTUNGSAUSSCHLUSS</h3>
+            
+            <div id="kioskWaiverTextDisplay" style="background:#222; padding:15px; border-radius:6px; font-size:11px; color:#ccc; max-height:150px; overflow-y:auto; margin-bottom:15px; white-space:pre-wrap; border:1px solid #444;">
+                <!-- Text comes from JS -->
+            </div>
+
+            <h4 style="margin-bottom:10px;" data-en="Digital Signature (Sign here):" data-en="Digital Signature (Sign here):">Digitale Unterschrift (Hier unterschreiben):</h4>
+            <div style="border: 2px dashed #e67e22; border-radius: 8px; background: #eee; text-align: center; position: relative;">
+                <canvas id="kioskSignatureCanvas" width="100" height="150" style="width: 100%; height: 150px; display: block; touch-action: none;"></canvas>
+                <button onclick="clearKioskSignature()" style="position:absolute; bottom:5px; right:5px; background:rgba(0,0,0,0.5); color:#fff; border:none; padding:5px 10px; border-radius:4px; font-size:10px;" data-en="CLEAR" data-en="CLEAR">LÖSCHEN</button>
+            </div>
+            
+            <div id="kioskActions" style="margin-top:20px;">
+                <button class="btn btn-red" style="width:100%; padding:15px; background:#2ecc71; border:none; font-size:16px;" onclick="saveKioskWaiver()" data-en="SIGN & SAVE" data-en="SIGN & SAVE">UNTERSCHREIBEN & SPEICHERN</button>
+            </div>
+            
+            <div id="kioskExportActions" style="display:none; margin-top:20px; background:#222; padding:15px; border-radius:8px;">
+                <h4 style="color:#2ecc71; margin-top:0;" data-en="✅ Saved successfully!" data-en="✅ Saved successfully!">✅ Erfolgreich gespeichert!</h4>
+                <div id="kioskBtnWaiverWebhookContainer" style="display:none; margin-bottom:10px;">
+                    <button class="btn btn-white" style="width:100%; padding:12px; background:#e67e22; color:#fff; border:none;" onclick="exportKioskWaiverWebhook()" data-en="☁️ SEND TO CLUB SYSTEM" data-en="☁️ SEND TO CLUB SYSTEM">☁️ AN VEREINSSYSTEM SENDEN</button>
+                </div>
+                <button class="btn btn-red" style="width:100%; padding:12px; margin-bottom:10px;" onclick="exportKioskWaiverWhatsApp()" data-en="📲 SEND TO COACH VIA WHATSAPP" data-en="📲 SEND TO COACH VIA WHATSAPP">📲 PER WHATSAPP AN COACH SENDEN</button>
+                <button class="btn btn-dark" style="width:100%; padding:12px;" onclick="closeKioskMode()" data-en="FINISH TRIAL TRAINING" data-en="FINISH TRIAL TRAINING">PROBETRAINING ABSCHLIESSEN</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <!-- ========================================== -->
+    <!-- A-GAME PLAYBOOK (FLOWCHART BUILDER) -->
+    <!-- ========================================== -->
+    <style>
+        #view-playbook.active { display: flex !important; flex-direction: column; height: 100%; }
+    </style>
+    <div id="view-playbook" class="view">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px; flex-wrap:wrap; gap:10px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <select id="pbPlaybookSelect" style="background:#222; color:#e67e22; border:2px solid #e67e22; padding:8px 15px; border-radius:8px; font-size:18px; font-weight:900; text-transform:uppercase; cursor:pointer;" onchange="pbSwitchPlaybook(this.value)">
+                    <!-- Options populated by JS -->
+                </select>
+                <button class="btn btn-dark" style="padding:8px 12px; font-size:12px;" onclick="pbCreateNew()" title="Neues Playbook">📄 Neu</button>
+                <button class="btn btn-dark" style="padding:8px 12px; font-size:12px;" onclick="pbClone()" title="Aktuelles Playbook klonen">👯 Klonen</button>
+                <button class="btn btn-dark" style="padding:8px 12px; font-size:12px;" onclick="pbRename()" title="Playbook umbenennen">✏️ Umbenennen</button>
+                <button class="btn btn-dark" style="padding:8px 12px; font-size:12px; color:#e74c3c;" onclick="pbDeletePlaybook()" title="Playbook löschen">🗑️ Löschen</button>
+            </div>
+        </div>
+        
+        <!-- Breadcrumbs & Toolbar -->
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <!-- Layer Info -->
+                <div style="font-size:16px; font-weight:900;">
+                    <span id="pb-breadcrumbs" style="color:#e67e22;">Root</span>
+                </div>
+                
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <select id="pbExportSelect" style="background:#111; color:#fff; border:1px solid #444; padding:5px; border-radius:4px; font-size:12px;" onchange="if(this.value) pbHandleExport(this.value); this.value='';">
+                        <option value="">📥 Exportieren...</option>
+                        <option value="json">Als Backup (JSON) speichern</option>
+                        <option value="import">Backup (JSON) laden</option>
+                        <option value="print">Als PDF exportieren / Drucken</option>
+                    </select>
+                    <input type="file" id="pbImportFile" style="display:none" accept=".json" onchange="pbHandleImportFile(event)">
+                    
+                    <button class="btn btn-primary" style="margin:0; font-size:12px; padding:5px 15px;" onclick="pbSaveAndBack()">💾 Speichern & Zurück</button>
+                </div>
+            </div>
+            
+            <div style="display:flex; gap:8px; background:#222; padding:8px; border-radius:8px; border:1px solid #444; flex-wrap:wrap; align-items:center;">
+                <div style="font-size:11px; color:#aaa; font-weight:bold; margin-right:5px; text-transform:uppercase;">Werkzeuge:</div>
+                
+                <button id="pbModeMove" style="margin:0; background:#3498db; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold;" onclick="pbSetMode('move')">✋ Verschieben & Bearbeiten</button>
+                
+                <button id="pbModeLink" style="margin:0; background:transparent; color:#aaa; border:1px solid #555; padding:5px 11px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold;" onclick="pbSetMode('link')">🔗 Pfeile ziehen</button>
+                
+                <div style="width:1px; height:20px; background:#444; margin:0 5px;"></div>
+                
+                <button style="margin:0; background:#e67e22; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold;" onclick="pbAddNode()">➕ Knotenpunkt erstellen</button>
+                
+                <div style="flex:1;"></div>
+                
+                <button style="margin:0; background:#9b59b6; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold; margin-right:5px;" onclick="pbAutoLayout()">🧹 Aufräumen</button>
+                <button style="margin:0; background:#34495e; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold; margin-right:5px;" onclick="pbCenterView(true)">🎯 Zentrieren</button>
+                <button style="margin:0; background:#444; color:#fff; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold;" onclick="pbZoom(1)">🔍+</button>
+                <button style="margin:0; background:#444; color:#fff; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold;" onclick="pbZoom(-1)">🔍-</button>
+            </div>
+        </div>
+
+        <!-- Canvas Area -->
+        <div id="pb-canvas-wrapper" style="flex:1; background:#111; border:2px solid #333; border-radius:8px; position:relative; overflow:hidden; touch-action:none; min-height:65vh; user-select:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none;" oncontextmenu="return false;">
+            <div id="pb-canvas" style="position:absolute; top:0; left:0; width:3000px; height:3000px; transform-origin: 0 0;">
+                <svg id="pb-svg" xmlns="http://www.w3.org/2000/svg" width="3000" height="3000" style="position:absolute; top:0; left:0; width:3000px; height:3000px;"></svg>
+                <!-- Nodes injected here -->
+            </div>
+            
+            <div id="pbTrashZone" style="display:none; position:absolute; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(231,76,60,0.9); color:white; padding:15px 30px; border-radius:30px; font-weight:bold; z-index:20; box-shadow:0 10px 20px rgba(0,0,0,0.5); pointer-events:none; border:2px dashed #fff; transition:0.2s;">
+                🗑️ Hierhin ziehen zum Löschen
+            </div>
+        </div>
+        
+        <div style="font-size:10px; color:#888; text-align:center; margin-top:10px;">
+            Tipp: Knoten antippen = Bearbeiten/Löschen/Layer öffnen. Canvas wischen = Bewegen.
+        </div>
+        
+        <button class="btn btn-dark" style="margin-top: 15px;" onclick="switchView('view-menu')" data-en="BACK TO DASHBOARD">ZURÜCK ZUM DASHBOARD</button>
+    </div>
+    
+    <!-- Edge Context Menu -->
+    <div id="pbEdgeContextMenu" style="display:none; position:absolute; z-index:1000; background:#222; border:1px solid #444; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.8); overflow:hidden;">
+        <div id="pbEdgeBtnEdit" style="padding:12px 18px; cursor:pointer; color:#fff; border-bottom:1px solid #333; font-size:14px; display:flex; align-items:center; gap:8px;">
+            ✏️ Beschriftung
+        </div>
+        <div id="pbEdgeBtnDelete" style="padding:12px 18px; cursor:pointer; color:#e74c3c; font-size:14px; display:flex; align-items:center; gap:8px;">
+            🗑️ Löschen
+        </div>
+    </div>
+
+    <!-- Playbook Node Edit Modal -->
+    <div id="pbNodeModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="document.getElementById('pbNodeModal').style.display='none'">×</button>
+            <h3 data-en="Edit Node">Knoten bearbeiten</h3>
+            <input type="text" id="pbNodeText" placeholder="Name (z.B. Armbar)" style="margin-bottom:10px;">
+            
+            <label style="font-size:12px; color:#aaa;">Video-Link (YouTube/Insta):</label>
+            <input type="text" id="pbNodeVideo" placeholder="https://..." style="margin-bottom:10px;">
+
+            <label style="font-size:12px; color:#aaa;">Stil / Farbe:</label>
+            <select id="pbNodeStyle" style="margin-bottom:10px;">
+                <option value="neutral">Standard (Neutral)</option>
+                <option value="offensive">Offensiv (Grün)</option>
+                <option value="defense">Defense / Achtung (Rot)</option>
+                <option value="submission">Submission (Gold)</option>
+                <option value="note">Randbemerkung (Grau/Ohne Rand)</option>
+            </select>
+
+            <label style="font-size:12px; color:#aaa;">Knoten-Art:</label>
+            <select id="pbNodeType" style="margin-bottom:10px;" onchange="document.getElementById('pbShortcutWrapper').style.display = this.value === 'shortcut' ? 'block' : 'none'">
+                <option value="normal">Normaler Knoten</option>
+                <option value="shortcut">🔗 Verknüpfung (Teleport)</option>
+            </select>
+            
+            <div id="pbShortcutWrapper" style="display:none; margin-bottom:10px;">
+                <label style="font-size:12px; color:#f1c40f;">Sprung-Ziel:</label>
+                <select id="pbNodeShortcutTarget">
+                    <!-- Options populated by JS -->
+                </select>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn btn-red" onclick="pbSaveNode()" style="flex:1;">Speichern</button>
+                <button class="btn btn-dark" onclick="pbDeleteNode()" style="flex:1; background:#c0392b; border-color:#e74c3c;">Löschen</button>
+            </div>
+            
+            <div style="margin-top:20px; border-top:1px solid #444; padding-top:15px; text-align:center;">
+                <button class="btn btn-white" onclick="pbEnterLayer()" id="pbBtnEnterLayer">📂 In diese Ebene (Layer) abtauchen</button>
+                <p style="font-size:10px; color:#aaa; margin-top:10px;">Erstelle Sub-Playbooks, z.B. für alle Optionen aus diesem Griff heraus.</p>
+            </div>
+        </div>
+    </div>
+
+
+
+
+</div>
+</div>
+<script src="js/playbook.js?v=9"></script>
+<script src="js/supporters.js?v=9"></script>
+<script src="js/app.js?v=9"></script>
+<script src="js/profile.js?v=9"></script>
+<script src="js/log.js?v=9"></script>
+<script src="js/features.js?v=8"></script>
+<script src="js/attendance.js?v=8"></script>
+<script src="js/breathing.js?v=8"></script>
+
+<!-- Service Worker Registration -->
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js').then(function(reg) {
+            console.log('[GrAPP] Service Worker registriert:', reg.scope);
+        }).catch(function(err) {
+            console.log('[GrAPP] SW Registrierung fehlgeschlagen:', err);
+        });
+    });
+}
+</script>
+</body>
+</html>

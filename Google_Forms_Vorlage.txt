@@ -1,0 +1,62 @@
+# VORLAGE FÜR GOOGLE FORMS (GB PSYCHE / MATTENKULTUR)
+
+Wenn du als Übertragungsweg "Google Forms" statt "WhatsApp" nutzt, kannst du diese Vorlage verwenden, um dein Formular bei Google in wenigen Minuten zusammenzuklicken.
+
+---
+
+## EINSTELLUNGEN IN GOOGLE FORMS
+1. Neues, leeres Formular erstellen.
+2. Titel: "GB Psyche / Mattenkultur Feedback"
+3. Beschreibung: "Dieses Feedback ist 100% anonym. Bitte bewerte die folgenden Aussagen ehrlich, um unsere Mattenkultur zu verbessern."
+4. In den Google Forms Einstellungen: Stelle sicher, dass E-Mail-Adressen NICHT erfasst werden (damit es anonym bleibt).
+
+## FRAGENTYP FÜR ALLE 15 FRAGEN: "Lineare Skala" (1 bis 5)
+- Beschriftung 1: "Trifft gar nicht zu"
+- Beschriftung 5: "Trifft voll zu"
+- Pflichtfrage: JA
+
+## DIE 15 KERNFRAGEN (Einfach per Copy & Paste einfügen):
+
+Frage 1: Ich fühle mich in meinem Team respektiert und wertgeschätzt.
+Frage 2: Ich kann Fehler machen, ohne dafür ausgelacht oder herabgesetzt zu werden.
+Frage 3: Mein Coach achtet auf meine körperlichen Grenzen und Verletzungen.
+Frage 4: Die Trainingsintensität wird an das Level der Teilnehmer angepasst.
+Frage 5: Ich habe das Gefühl, dass auf Hygiene (Matte, Kleidung) geachtet wird.
+Frage 6: Probleme oder Konflikte im Team werden offen und konstruktiv geklärt.
+Frage 7: Es gibt keinen ungesunden Druck, verletzt oder krank trainieren zu müssen.
+Frage 8: Die Trainingsinhalte bauen logisch aufeinander auf.
+Frage 9: Ich weiß, was von mir als Schüler erwartet wird.
+Frage 10: Feedback vom Coach ist hilfreich und sachlich.
+Frage 11: Neue Trainingspartner werden gut ins Team integriert.
+Frage 12: Das Sparring findet in einer kontrollierten und sicheren Atmosphäre statt.
+Frage 13: Ich traue mich, meinem Coach Fragen zu stellen.
+Frage 14: Grenzüberschreitungen werden vom Gym-Leader nicht toleriert.
+Frage 15: Ich gehe nach dem Training meistens mit einem positiven Gefühl nach Hause.
+
+---
+
+## ABSCHLUSS-FRAGEN (Optional, aber empfohlen):
+
+**1. Freitext Feedback:**
+- Typ: Absatz (Langer Text)
+- Frage: "Was brennt dir sonst auf der Seele? (Freitext Feedback)"
+- Pflichtfrage: NEIN
+
+**2. Name (falls nicht anonym gewünscht):**
+- Typ: Kurzantwort
+- Frage: "Dein Name (Optional)"
+- Pflichtfrage: NEIN
+
+**3. Kontaktwunsch:**
+- Typ: Kästchen / Multiple Choice
+- Frage: "Möchtest du, dass wir bezüglich deines Feedbacks Kontakt mit dir aufnehmen?"
+- Antworten: "Ja, bitte meldet euch bei mir."
+- Pflichtfrage: NEIN
+
+---
+
+## SO BEKOMMST DU DEINE ID FÜR DIE APP:
+1. Klicke in Google Forms oben rechts auf "Senden".
+2. Wähle das Link-Symbol (🔗).
+3. Kopiere den Link (gerne auch als "URL verkürzen").
+4. Trage genau diesen Link im Profil der GrAPP unter "Google Forms Link / ID" ein.

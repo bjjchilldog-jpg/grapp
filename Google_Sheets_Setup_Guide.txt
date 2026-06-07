@@ -1,0 +1,69 @@
+# GOOGLE SHEETS ANWESENHEIT - SETUP GUIDE
+
+Mit dieser Anleitung erstellst du ein Google Sheet, in dem die Anwesenheit der Schüler automatisch protokolliert wird, sobald du ihren QR-Code einscannst.
+
+## SCHRITT 1: Tabelle anlegen
+1. Öffne Google Sheets (Tabellen) und erstelle eine leere Tabelle.
+2. Schreibe in die erste Zeile folgende Überschriften:
+   - Zelle A1: **Datum**
+   - Zelle B1: **Uhrzeit**
+   - Zelle C1: **Sportart**
+   - Zelle D1: **Name**
+   - Zelle E1: **Graduierung**
+3. Benenne das Tabellenblatt unten (wo "Tabellenblatt1" steht) um in: **Anwesenheit**
+
+## SCHRITT 2: Apps Script einfügen
+1. Klicke im Menü auf **Erweiterungen** -> **Apps Script**.
+2. Lösche den gesamten dort stehenden Code (`function myFunction() {...}`).
+3. Kopiere den folgenden Code und füge ihn komplett ein:
+
+```javascript
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Anwesenheit");
+  
+  if (e && e.postData && e.postData.contents) {
+    try {
+      var data = JSON.parse(e.postData.contents);
+      
+      // Spalten: Datum, Uhrzeit, Sportart, Name, Graduierung
+      sheet.appendRow([
+        data.date,
+        data.time,
+        data.sport,
+        data.name,
+        data.belt
+      ]);
+      
+      return ContentService.createTextOutput(JSON.stringify({"status": "success"})).setMimeType(ContentService.MimeType.JSON);
+    } catch(err) {
+      return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": err.toString()})).setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+  return ContentService.createTextOutput("No data received.");
+}
+```
+
+4. Klicke oben auf das **Speichern-Symbol** (Diskette).
+
+## SCHRITT 3: Skript als Web-App veröffentlichen
+1. Klicke oben rechts auf den blauen Button **Bereitstellen** -> **Neue Bereitstellung**.
+2. Klicke links auf das **Zahnrad-Symbol** und wähle **Web-App**.
+3. Bei "Beschreibung": z.B. "GrAPP Webhook".
+4. Bei "Ausführen als": Wähle **Mich (deine Email)**.
+5. Bei "Wer hat Zugriff": Wähle **Jeder** (Sehr wichtig, sonst funktioniert die App nicht!).
+6. Klicke auf **Bereitstellen**.
+7. Google wird dich nun nach Berechtigungen fragen:
+   - Klicke auf "Zugriff autorisieren".
+   - Wähle deinen Google-Account.
+   - Es erscheint eine Warnung "Google hat diese App nicht überprüft". Klicke unten auf **Erweitert** und dann auf **Zum Projekt wechseln (unsicher)**.
+   - Erlaube den Zugriff.
+8. Nach Abschluss erhältst du eine **Web-App-URL** (beginnt mit `https://script.google.com/macros/s/.../exec`).
+
+## SCHRITT 4: URL in der App eintragen
+1. Kopiere diese lange Web-App-URL.
+2. Gehe in der GrAPP ins **GYM PROFIL**.
+3. Wähle als Rolle "Coach".
+4. Füge die kopierte URL in das neue Feld **Google Sheets Webhook (Anwesenheit)** ein.
+5. Klicke auf "SPEICHERN & ZURÜCK".
+
+Fertig! Sobald du nun einen Schüler scannst, erscheint er nicht nur in deiner lokalen Liste in der App, sondern wird sofort in dein Google Sheet eingetragen.
