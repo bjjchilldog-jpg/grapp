@@ -309,13 +309,15 @@ function saveProfile() {
 }
 
 function toggleTrainingDay(day) {
-    let days = safeGet('grapp_training_days', []);
+    const sport = window.currentSport || "bjj";
+    const key = 'grapp_training_days_' + sport;
+    let days = safeGet(key, []);
     if (days.includes(day)) {
         days = days.filter(d => d !== day);
     } else {
         days.push(day);
     }
-    safeSet('grapp_training_days', days);
+    safeSet(key, days);
     
     // UI Update
     const btn = document.getElementById('day_' + day);
@@ -397,7 +399,8 @@ function loadProfileData() {
     }
 
     // Trainingstage laden
-    let days = safeGet('grapp_training_days', []);
+    const sportKey = 'grapp_training_days_' + (window.currentSport || 'bjj');
+    let days = safeGet(sportKey, safeGet('grapp_training_days', []));
     [0, 1, 2, 3, 4, 5, 6].forEach(day => {
         const btn = document.getElementById('day_' + day);
         if (btn) {
