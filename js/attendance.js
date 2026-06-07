@@ -47,7 +47,7 @@ function generateStudentQR() {
         emergencyPhone: safeGet('grapp_user_phone', safeGet('grapp_corner_parent_phone', ''))
     };
 
-    const qrData = JSON.stringify(payload);
+    const qrData = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
 
     new QRCode(qrContainer, {
         text: qrData,
@@ -86,8 +86,14 @@ function startScanner() {
 
 function onScanSuccess(decodedText, decodedResult) {
     try {
-        const data = JSON.parse(decodedText);
-        
+        let payloadStr = decodedText;
+        // Try decoding base64 if it is obfuscated
+        try {
+            payloadStr = decodeURIComponent(escape(atob(decodedText)));
+        } catch(e) {
+            // Not base64 encoded, fallback to raw text (for backwards compatibility)
+        }
+        const data = JSON.parse(payloadStr);
         // Anti-Fake Check: Ist das wirklich ein GrAPP Code?
         if (!data.name || data.type === "grapp_gym_setup") throw new Error("Kein Athleten-Code");
 
@@ -187,9 +193,10 @@ function renderAttendanceList() {
 
     let html = "";
     list.forEach(item => {
+        let safeName = (typeof escapeHTML === 'function') ? escapeHTML(item.name || '') : item.name;
         html += `<div style="padding:10px; border-bottom:1px solid #222; display:flex; justify-content:space-between; align-items:center; background:#161616;">
             <div>
-                <strong style="color:#fff; font-size:14px;">${item.name}</strong>
+                <strong style="color:#fff; font-size:14px;">${safeName}</strong>
                 <div style="font-size:11px; color:#888;">${item.sport.toUpperCase()} | ${item.belt}</div>
             </div>
             <div style="color:#3498db; font-size:12px; font-weight:bold;">${item.time}</div>

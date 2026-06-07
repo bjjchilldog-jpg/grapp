@@ -156,24 +156,52 @@ function handleLogoUpload(event) {
 
     const reader = new FileReader();
     reader.onload = function(e) {
-        try {
-            const base64String = e.target.result;
-            localStorage.setItem('grapp_custom_logo_url', base64String);
-            alert("✅ Gym-Logo erfolgreich gespeichert! Starte die App neu, um es zu sehen.");
-            // Custom Links
-            for(let i=1; i<=3; i++) {
-                let ln = document.getElementById('cl'+i+'_name');
-                let lu = document.getElementById('cl'+i+'_url');
-                if(ln && lu) {
-                    safeSet('grapp_cl'+i+'_name', ln.value.trim());
-                    safeSet('grapp_cl'+i+'_url', lu.value.trim());
+        const img = new Image();
+        img.onload = function() {
+            // Resize logic
+            const MAX_WIDTH = 200;
+            const MAX_HEIGHT = 200;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+            } else {
+                if (height > MAX_HEIGHT) {
+                    width *= MAX_HEIGHT / height;
+                    height = MAX_HEIGHT;
                 }
             }
-            if (typeof applyGymTheme === 'function') applyGymTheme();
-        } catch (error) {
-            console.error("Storage Error:", error);
-            alert("⚠️ Das Bild ist zu groß für den lokalen Speicher. Bitte nutze ein komprimiertes Bild.");
-        }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            try {
+                // Compress to JPEG with 0.7 quality to save localStorage space
+                const base64String = canvas.toDataURL('image/jpeg', 0.7);
+                safeSet('grapp_custom_logo_url', base64String);
+                
+                // Set the URL input field
+                const urlInput = document.getElementById('profLogoUrl');
+                if (urlInput) urlInput.value = base64String;
+
+                alert("✅ Gym-Logo erfolgreich verkleinert und gespeichert!");
+                if (typeof applyGymTheme === 'function') applyGymTheme();
+            } catch (error) {
+                console.error("Storage Error:", error);
+                alert("⚠️ Speichern fehlgeschlagen. Der lokale Speicher ist voll.");
+            }
+        };
+        img.onerror = function() {
+            alert("Fehler beim Laden des Bildes.");
+        };
+        img.src = e.target.result;
     };
     reader.readAsDataURL(file);
 }

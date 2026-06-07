@@ -372,11 +372,15 @@ function changeLanguage() {
 // ==========================================
 // 5. CENTRAL APP NAVIGATION
 // ==========================================
-function switchView(id) {
+function switchView(id, isPop = false) {
     var views = document.querySelectorAll('.view');
     for (var i = 0; i < views.length; i++) { views[i].classList.remove('active'); }
     var viewObj = document.getElementById(id);
     if(viewObj) viewObj.classList.add('active');
+    
+    if (!isPop) {
+        window.history.pushState({ view: id }, '', '#' + id);
+    }
     
     // Robust class for fullscreen timer (fallback for browsers without :has support)
     if(id === 'view-timer') {
@@ -432,6 +436,29 @@ function switchView(id) {
     if (id === 'view-about') {
         if(typeof renderGiroCode === 'function') renderGiroCode();
     }
+}
+
+window.addEventListener('popstate', function(event) {
+    if (event.state && event.state.view) {
+        // Prevent pushState when popping
+        const id = event.state.view;
+        var views = document.querySelectorAll('.view');
+        for (var i = 0; i < views.length; i++) { views[i].classList.remove('active'); }
+        var viewObj = document.getElementById(id);
+        if(viewObj) viewObj.classList.add('active');
+        if(id === 'view-timer') document.body.classList.add('timer-fullscreen-active');
+        else { document.body.classList.remove('timer-fullscreen-active'); document.body.classList.remove('force-landscape'); }
+    } else {
+        switchView('view-menu', true);
+    }
+});
+
+function escapeHTML(str) {
+    if (typeof str !== 'string') return str;
+    return str.replace(/[&<>'"]/g, function(tag) {
+        const charsToReplace = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' };
+        return charsToReplace[tag] || tag;
+    });
 }
 
 // ==========================================
