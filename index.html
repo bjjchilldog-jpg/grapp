@@ -18,8 +18,16 @@
 
     <link rel="stylesheet" href="css/style.css">
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <!-- Enforce HTTPS -->
+    <script>
+        if (location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+            location.protocol = 'https:';
+        }
+    </script>
+
+    <!-- Externe Bibliotheken -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WU1yM/RVm/rxjwRYjT/ZfP5Bq7aFofqE2kQ4CTUzhP2B2Xn8XJpg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
 

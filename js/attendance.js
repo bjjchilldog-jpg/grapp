@@ -70,10 +70,14 @@ function startScanner() {
 
     // Toggle-Funktion: Wenn an, dann ausmachen
     if (html5QrcodeScanner) {
-        html5QrcodeScanner.clear();
-        html5QrcodeScanner = null;
-        qrReader.innerHTML = "";
-        document.getElementById('btnScanAthletes').innerHTML = '<span class="icon">📸</span> SCHÜLER SCANNEN';
+        html5QrcodeScanner.clear().then(() => {
+            html5QrcodeScanner = null;
+            // Memory Cleanup (Copilot Fix) - remove dangling listeners by recreating the node
+            const clone = qrReader.cloneNode(true);
+            qrReader.parentNode.replaceChild(clone, qrReader);
+            clone.innerHTML = "";
+            document.getElementById('btnScanAthletes').innerHTML = '<span class="icon">📸</span> SCHÜLER SCANNEN';
+        }).catch(err => console.log("Cleanup Error", err));
         return;
     }
 
