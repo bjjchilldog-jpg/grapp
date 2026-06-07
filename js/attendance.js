@@ -114,8 +114,24 @@ function onScanSuccess(decodedText, decodedResult) {
             // UI updaten
             renderAttendanceList();
             
-            // Haptisches und visuelles Feedback
+            // Haptisches, akustisches und visuelles Feedback
             if ("vibrate" in navigator) navigator.vibrate(200);
+            
+            // Piepton generieren (Web Audio API)
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 880; // Tonhöhe (A5)
+                gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.1);
+            } catch(e) { console.log("Audio feedback disabled"); }
+
             alert(`✅ ${data.name} erfolgreich eingecheckt!`);
         } else {
             alert(`⚠️ ${data.name} ist heute bereits eingecheckt.`);
