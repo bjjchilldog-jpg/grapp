@@ -44,7 +44,7 @@ self.addEventListener('activate', function(event) {
     self.clients.claim();
 });
 
-// Fetch: Network-First mit Cache-Fallback
+// Fetch: Stale-While-Revalidate Pattern
 self.addEventListener('fetch', function(event) {
     // Externe Ressourcen (CDN) immer vom Netzwerk laden
     if (!event.request.url.startsWith(self.location.origin)) {
@@ -52,26 +52,23 @@ self.addEventListener('fetch', function(event) {
     }
     
     event.respondWith(
-        fetch(event.request)
-            .then(function(response) {
-                // Erfolgreiche Antwort in Cache speichern
-                if (response.status === 200) {
-                    var responseClone = response.clone();
+        caches.match(event.request).then(function(cachedResponse) {
+            const fetchPromise = fetch(event.request).then(function(networkResponse) {
+                if (networkResponse && networkResponse.status === 200) {
                     caches.open(CACHE_NAME).then(function(cache) {
-                        cache.put(event.request, responseClone);
+                        cache.put(event.request, networkResponse.clone());
                     });
                 }
-                return response;
-            })
-            .catch(function() {
-                // Offline: Aus Cache laden
-                return caches.match(event.request).then(function(cachedResponse) {
-                    return cachedResponse || new Response('Offline - Seite nicht verfügbar', {
-                        status: 503,
-                        statusText: 'Service Unavailable',
-                        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
-                    });
-                });
-            })
+                return networkResponse;
+            }).catch(function() {
+                // Ignore fetch errors to gracefully fallback to cache
+            });
+
+            return cachedResponse || fetchPromise || new Response('Offline - Seite nicht verfügbar', {
+                status: 503,
+                statusText: 'Service Unavailable',
+                headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+            });
+        })
     );
 });

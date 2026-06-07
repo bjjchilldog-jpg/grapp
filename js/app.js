@@ -636,7 +636,7 @@ function startDictation(inputId) {
         
         recognition.continuous = false;
         recognition.interimResults = false;
-        recognition.lang = navigator.language || "de-DE";
+        recognition.lang = safeGet('grapp_lang', 'de') === 'en' ? 'en-US' : 'de-DE';
         
         var inputEl = document.getElementById(inputId);
         if(!inputEl) return;
@@ -645,7 +645,7 @@ function startDictation(inputId) {
         var originalPlaceholder = inputEl.placeholder;
         
         inputEl.style.backgroundColor = "#531"; 
-        inputEl.placeholder = "Höre zu... (Sprechen) 🎤";
+        inputEl.placeholder = recognition.lang === 'en-US' ? "Listening... (Speak) 🎤" : "Höre zu... (Sprechen) 🎤";
         
         recognition.onresult = function(e) {
             var text = e.results[0][0].transcript;
@@ -659,7 +659,7 @@ function startDictation(inputId) {
             inputEl.style.backgroundColor = originalBg;
             inputEl.placeholder = originalPlaceholder;
             if(e.error !== 'no-speech') {
-                alert("Diktierfunktion Fehler: " + e.error);
+                alert(recognition.lang === 'en-US' ? "Dictation error: " + e.error : "Diktierfunktion Fehler: " + e.error);
             }
         };
         
@@ -670,7 +670,7 @@ function startDictation(inputId) {
         
         recognition.start();
     } else {
-        alert("Dein Browser unterstützt diese Diktierfunktion leider nicht direkt. Bitte nutze stattdessen das Mikrofon-Symbol auf der Tastatur deines Handys.");
+        alert(safeGet('grapp_lang', 'de') === 'en' ? "Your browser does not support dictation. Please use the microphone icon on your keyboard." : "Dein Browser unterstützt diese Diktierfunktion leider nicht direkt. Bitte nutze stattdessen das Mikrofon-Symbol auf der Tastatur deines Handys.");
     }
 }
 
