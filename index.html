@@ -141,8 +141,7 @@
         <button class="btn btn-red menu-full" style="background:#27ae60; border:none; margin-bottom:10px;" onclick="switchView('view-playbook')"><span class="icon">🗺️</span><span data-en="A-GAME PLAYBOOK">A-GAME PLAYBOOK</span></button>
         <button class="btn btn-dark menu-full" onclick="switchView('view-camp')"><span class="icon">📅</span><span id="btnCampText" data-en="FIGHT CAMP PLANNER" data-en="FIGHT CAMP PLANNER" data-en="FIGHT CAMP PLANNER">FIGHT CAMP PLANER</span></button>
         <div class="menu-grid">
-            <button class="btn btn-dark" id="btnRules" onclick="switchView('view-rules')"><span class="icon">⚖️</span><span data-en="RULESETS" data-en="RULESETS" data-en="RULESETS">REGELWERKE</span></button>
-            <button class="btn btn-dark" onclick="switchView('view-manifest')"><span class="icon">📜</span><span data-en="CORNER INFO" data-en="CORNER INFO" data-en="CORNER INFO">CORNER INFO</span></button>
+            <button class="btn btn-dark menu-full" id="btnRules" onclick="switchView('view-rules')"><span class="icon">⚖️</span><span data-en="RULESETS" data-en="RULESETS" data-en="RULESETS">REGELWERKE</span></button>
         </div>
 
         <div id="dashboardCustomLinks" style="display:none; margin-top:20px;"></div>
@@ -186,7 +185,8 @@
                 <div id="coachSetupQR" style="text-align:center; background:#fff; padding:10px; border-radius:8px; margin-top:10px; display:none;"></div>
             </div>
 
-            <button class="btn btn-red" style="margin-top:20px;" id="btnScanAthletes" onclick="startScanner()"><span class="icon">📸</span data-en="SCAN STUDENTS">SCHÜLER SCANNEN</button>
+            <button class="btn btn-red" style="margin-top:20px;" id="btnScanAthletes" onclick="startScanner()"><span class="icon">📸</span><span data-en="SCAN STUDENTS">SCHÜLER SCANNEN</span></button>
+            <button class="btn btn-white" style="margin-top:10px; width:100%;" onclick="coachSelfCheckIn()"><span class="icon">🙋</span><span data-en="CHECK MYSELF IN">MICH SELBST EINCHECKEN</span></button>
             <div id="qr-reader"></div>
             
             <h3 style="margin-top:25px; border-top: 1px solid #333; padding-top:15px;" data-en="LIST TODAY">LISTE HEUTE</h3>
@@ -246,6 +246,11 @@
 
         <div class="card" style="border-left-color: #3498db;">
             <h3 data-en="👤 PERSONAL MASTER DATA" data-en="👤 PERSONAL MASTER DATA">👤 PERSÖNLICHE STAMMDATEN</h3>
+            
+            <label style="color:#2ecc71; margin-top:5px;" data-en="Member ID / Scanner ID:">Mitglieds-ID / Scanner-ID:</label>
+            <p style="font-size:10px; color:#ccc; margin-top:2px; margin-bottom:5px;" data-en="If filled, the QR code only transmits this ID. Protects against data leaks and XSS.">Wenn ausgefüllt, überträgt der QR-Code aus Datenschutz- und Sicherheitsgründen (Anti-XSS) nur noch diese ID an das Vereinssystem.</p>
+            <input type="text" id="profMemberId" placeholder="z.B. 42 oder 105" onchange="saveProfile()">
+            
             <label style="display:flex; justify-content:space-between; align-items:center;">
                 <span data-en="First and Last Name:" data-en="First and Last Name:">Vor- und Nachname:</span>
                 <button class="btn-sm" style="margin:0; background:#333; color:#fff;" onclick="startDictation('profName')">🎤</button>
@@ -837,19 +842,7 @@
         <button class="btn btn-dark" style="margin-top:20px;" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
     </div>
 
-    <div id="view-manifest" class="view">
-        <h2 data-en="📋 CORNER INFO / FIGHTER PASSPORT">📋 CORNER INFO / FIGHTER PASSPORT</h2>
-        <p style="font-size:11px; color:#aaa; text-align:center; margin-bottom: 20px;" data-en="All critical medical and administrative data instantly accessible.">Alle kritischen medizinischen und administrativen Daten im direkten Zugriff.</p>
 
-        <div class="card" style="border-left-color: #e74c3c; background: #151515;">
-            <div id="manifestReadOnlyContent" style="font-size:13px; color:#eee; line-height:1.6;">
-                </div>
-        </div>
-
-        <button class="btn btn-white" style="width: 100%; padding: 15px; font-size: 13px;" onclick="exportCornerToCoach()"><span class="icon">📲</span data-en="EXPORT FILE VIA WHATSAPP">AKTE PER WHATSAPP EXPORTIEREN</button>
-        <button class="btn btn-dark" style="margin-top:15px; width: 100%;" onclick="switchView('view-menu')" data-en="BACK" data-en="BACK">ZURÜCK</button>
-    </div>
-    
     <div id="view-shop" class="view">
         <h2 data-en="LINKS & ACADEMY">LINKS & ACADEMY</h2>
         
