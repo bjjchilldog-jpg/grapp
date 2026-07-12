@@ -36,18 +36,21 @@ function generateStudentQR() {
         return;
     }
 
-    // SICHERHEITS-UPDATE: Wir packen die SiFa-Daten mit in den Payload!
-    // So hat der Coach beim Scannen sofort alle Notfalldaten auf dem Schirm.
-    const payload = {
-        name: name,
-        belt: safeGet('grapp_user_belt', 'White'),
-        sport: currentSport,
-        birthdate: safeGet('grapp_corner_birthdate', safeGet('grapp_user_birthdate', '')),
-        medication: safeGet('grapp_corner_medication', ''),
-        emergencyPhone: safeGet('grapp_user_phone', safeGet('grapp_corner_parent_phone', ''))
-    };
+    const memberId = safeGet('grapp_member_id', '').trim();
+    let qrData;
 
-    const qrData = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+    if (memberId) {
+        // GARDEROBENKARTE LOGIC: If Member ID is set, only transmit the ID.
+        qrData = `GRAPP-TICKET-${memberId}`;
+    } else {
+        // FIRST VISIT LOGIC: Only transmit Name & Belt. No medical data!
+        const payload = {
+            name: name,
+            belt: safeGet('grapp_user_belt', 'White'),
+            sport: currentSport
+        };
+        qrData = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+    }
 
     new QRCode(qrContainer, {
         text: qrData,
@@ -90,16 +93,25 @@ function startScanner() {
 
 function onScanSuccess(decodedText, decodedResult) {
     try {
-        let payloadStr = decodedText;
-        // Try decoding base64 if it is obfuscated
-        try {
-            payloadStr = decodeURIComponent(escape(atob(decodedText)));
-        } catch(e) {
-            // Not base64 encoded, fallback to raw text (for backwards compatibility)
+        let data;
+        let isTicket = false;
+        
+        if (decodedText.startsWith("GRAPP-TICKET-")) {
+            const memberId = decodedText.replace("GRAPP-TICKET-", "");
+            data = { 
+                name: `ID: ${memberId}`,
+                belt: "N/A",
+                sport: "Ticket"
+            };
+            isTicket = true;
+        } else {
+            let payloadStr = decodedText;
+            try {
+                payloadStr = decodeURIComponent(escape(atob(decodedText)));
+            } catch(e) {}
+            data = JSON.parse(payloadStr);
+            if (!data.name || data.type === "grapp_gym_setup") throw new Error("Kein Athleten-Code");
         }
-        const data = JSON.parse(payloadStr);
-        // Anti-Fake Check: Ist das wirklich ein GrAPP Code?
-        if (!data.name || data.type === "grapp_gym_setup") throw new Error("Kein Athleten-Code");
 
         let list = safeGet('grapp_attendance_today', []);
         
@@ -142,9 +154,11 @@ function onScanSuccess(decodedText, decodedResult) {
                 oscillator.stop(audioCtx.currentTime + 0.1);
             } catch(e) { console.log("Audio feedback disabled"); }
 
-            showToast(`✅ ${data.name} eingecheckt!`, "success");
+            let safeName = (typeof escapeHTML === 'function') ? escapeHTML(data.name || '') : data.name;
+            showToast(`✅ ${safeName} eingecheckt!`, "success");
         } else {
-            showToast(`⚠️ ${data.name} ist bereits erfasst.`, "warning");
+            let safeName = (typeof escapeHTML === 'function') ? escapeHTML(data.name || '') : data.name;
+            showToast(`⚠️ ${safeName} ist bereits erfasst.`, "warning");
         }
 
     } catch (e) {
@@ -198,10 +212,12 @@ function renderAttendanceList() {
     let html = "";
     list.forEach(item => {
         let safeName = (typeof escapeHTML === 'function') ? escapeHTML(item.name || '') : item.name;
+        let safeSport = (typeof escapeHTML === 'function') ? escapeHTML((item.sport || '').toUpperCase()) : (item.sport || '').toUpperCase();
+        let safeBelt = (typeof escapeHTML === 'function') ? escapeHTML(item.belt || '') : item.belt;
         html += `<div style="padding:10px; border-bottom:1px solid #222; display:flex; justify-content:space-between; align-items:center; background:#161616;">
             <div>
                 <strong style="color:#fff; font-size:14px;">${safeName}</strong>
-                <div style="font-size:11px; color:#888;">${item.sport.toUpperCase()} | ${item.belt}</div>
+                <div style="font-size:11px; color:#888;">${safeSport} | ${safeBelt}</div>
             </div>
             <div style="color:#3498db; font-size:12px; font-weight:bold;">${item.time}</div>
         </div>`;
@@ -214,6 +230,38 @@ function clearAttendanceList() {
     if (confirm("Möchtest du die heutige Check-In-Liste wirklich leeren? (Gescannte Schüler bleiben in deiner Athleten-Akte gespeichert!)")) {
         safeSet('grapp_attendance_today', []);
         renderAttendanceList();
+    }
+}
+
+// ----------------------------------------------------------------------------
+// COACH SELF-CHECK-IN
+// ----------------------------------------------------------------------------
+function coachSelfCheckIn() {
+    const name = safeGet('grapp_user_name', 'Coach');
+    const belt = safeGet('grapp_user_belt', 'Black');
+    
+    let list = safeGet('grapp_attendance_today', []);
+    const alreadyScanned = list.some(item => item.name === name);
+    
+    if (!alreadyScanned) {
+        const now = new Date();
+        const data = {
+            name: name,
+            belt: belt,
+            sport: typeof currentSport !== 'undefined' ? currentSport : 'BJJ',
+            time: now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+            date: now.toLocaleDateString('de-DE')
+        };
+        
+        list.push(data);
+        safeSet('grapp_attendance_today', list);
+        
+        if (typeof sendAttendeeToWebhook === 'function') sendAttendeeToWebhook(data);
+        
+        renderAttendanceList();
+        showToast("✅ Du hast dich selbst eingecheckt!", "success");
+    } else {
+        showToast("⚠️ Du bist heute schon eingecheckt.", "warning");
     }
 }
 
