@@ -33,22 +33,23 @@ Alle nutzergenerierten Daten (Trainingslogs, medizinische Notizen, Geburtsdatum,
 ---
 
 ## 3. Datenübertragung & Netzwerk (Check-In)
-Das Kernfeature der App ist das Einchecken im Gym, bei dem kurzzeitig medizinische Notfalldaten (SiFa) zwischen Schüler und Coach ausgetauscht werden.
+Das Kernfeature der App ist das Einchecken im Gym. Um die Datensicherheit und Privatsphäre beim Scannen zu maximieren, wurde das Konzept des Austauschs von medizinischen Notfalldaten ("Corner Info") komplett verworfen.
 
 **Der optische Handshake (QR-Code):**
-Anstatt Daten über das Internet zu synchronisieren, generiert die App des Schülers einen QR-Code. Dieser QR-Code enthält ein JSON-Payload mit den relevanten Daten (Name, Gürtel, Geburtsdatum, Notfallkontakt).
-* **Verschleierung:** Das Payload wird vor der Generierung base64-encodiert. Das ist *keine* kryptografische Verschlüsselung, sondern ein bewusster Sichtschutz gegen "Shoulder-Surfing" (z.B. wenn jemand den Code versehentlich mit der normalen iPhone-Kamera scannt). Nur der In-App-Scanner des Coaches decodiert den Payload.
-* **Consent:** Die Datenübertragung findet nur statt, wenn der Schüler sein Handy aktiv hinhält und der Coach es scannt.
+Anstatt Daten über das Internet zu synchronisieren, generiert die App des Schülers einen QR-Code für den Check-In.
+* **Erster Besuch (Basis-Daten):** Wenn noch keine Mitglieds-ID im Profil hinterlegt ist, überträgt der QR-Code lediglich Name, Gürtel und Sportart (base64-encodiert).
+* **Garderobenkarten-Prinzip (Zero-Data):** Sobald der Athlet seine Mitglieds-ID (z.B. 42) in sein Profil einträgt, überträgt der QR-Code *nur noch* diesen String (als `GRAPP-TICKET-42`). Sensible Daten verlassen das Gerät ab diesem Zeitpunkt nicht mehr.
+* **Schutz gegen Dritt-Scanner:** Wer den QR-Code eines Mitglieds mit einer normalen iPhone-Kamera scannt, sieht lediglich die anonyme ID. Die Zuordnung der ID zum echten Athleten erfolgt sicher und ausschließlich beim Coach.
 
 **Der Webhook (Optional):**
-Lediglich die App des *Coaches* baut nach erfolgreichem Scan eine aktive Netzwerkverbindung auf. Die Anwesenheitsdaten werden via `fetch()` (POST) an eine Google Form / ein Google Sheet gesendet. Dies ist das einzige Backend-System, auf das die App zugreift.
+Lediglich die App des *Coaches* baut nach erfolgreichem Scan eine aktive Netzwerkverbindung auf. Die Anwesenheitsdaten (oder die gescannte ID) werden via `fetch()` (POST) an eine Google Form / ein Google Sheet gesendet. Dies ist das einzige Backend-System, auf das die App zugreift.
 
 ---
 
 ## 4. Implementierte Sicherheitsmaßnahmen (Security)
 
 1. **XSS Protection (Cross-Site-Scripting):**
-   Da wir kein Backend haben, das Inputs sanitizen kann, erfolgt die Maskierung beim Rendering. Alle dynamischen Ausgaben aus dem LocalStorage (wie Namen, Team-Links) werden durch eine globale `escapeHTML()` Funktion (in `app.js`) geschleust, um HTML/JS-Injections zu verhindern.
+   Da wir kein Backend haben, das Inputs sanitizen kann, erfolgt die Maskierung streng beim Rendering. Alle dynamischen Ausgaben – sowohl aus dem LocalStorage als auch potenziell bösartige Inputs via QR-Scanner (Name, Gürtel, Sportart) – werden konsequent durch eine globale `escapeHTML()` Funktion (in `app.js`) geschleust. Dadurch sind Reflected-XSS-Angriffe über manipulierte QR-Payloads ausgeschlossen.
 2. **HTTPS Enforcement:**
    Ein Skript in der `index.html` erzwingt den Redirect auf `https://`. Über GitHub Pages ist TLS/SSL ohnehin Standard.
 3. **Subresource Integrity (SRI):**

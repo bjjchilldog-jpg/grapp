@@ -235,6 +235,7 @@ function toggleCoachFields() {
 
 function saveProfile() {
     // Stammdaten & Medizin
+    safeSet('grapp_member_id', document.getElementById('profMemberId')?.value || "");
     if (!isUserPro()) {
         safeSet('grapp_user_name', document.getElementById('profName')?.value || "");
         safeSet('grapp_user_gender', document.getElementById('profGender')?.value || "m");
@@ -362,6 +363,7 @@ function toggleTrainingDay(day) {
 
 function loadProfileData() {
     // Stammdaten & Medizin
+    if(document.getElementById('profMemberId')) document.getElementById('profMemberId').value = safeGet('grapp_member_id', "");
     if(document.getElementById('profName')) document.getElementById('profName').value = safeGet('grapp_user_name', "");
     if(document.getElementById('profGender')) document.getElementById('profGender').value = safeGet('grapp_user_gender', "m");
     if(document.getElementById('profAddress')) document.getElementById('profAddress').value = safeGet('grapp_user_address', "");
