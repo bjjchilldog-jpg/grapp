@@ -31,36 +31,44 @@ function generateStudentQR() {
     qrContainer.innerHTML = "";
 
     const name = safeGet('grapp_user_name', '');
-    if (!name) {
-        qrContainer.innerHTML = "<p style='color:#e74c3c; font-size:12px; font-weight:bold;'>⚠️ Bitte trage zuerst deinen Namen im 'GYM PROFIL' ein, um deinen Ausweis zu generieren!</p>";
-        return;
+    if (!name) { 
+        qrContainer.innerHTML = '<p style="color:#e74c3c; font-size:12px;">Bitte zuerst dein Profil ausfüllen!</p>';
+        return; 
     }
 
-    const memberId = safeGet('grapp_member_id', '').trim();
-    let qrData;
+    try {
+        const memberId = safeGet('grapp_member_id', '').trim();
+        let qrData;
 
-    if (memberId) {
-        // GARDEROBENKARTE LOGIC: If Member ID is set, only transmit the ID.
-        qrData = `GRAPP-TICKET-${memberId}`;
-    } else {
-        // FIRST VISIT LOGIC: Only transmit Name & Belt. No medical data!
-        const payload = {
-            name: name,
-            belt: safeGet('grapp_user_belt', 'White'),
-            sport: currentSport
-        };
-        qrData = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+        if (memberId) {
+            qrData = `GRAPP-TICKET-${memberId}`;
+        } else {
+            const payload = {
+                name: name,
+                belt: safeGet('grapp_user_belt', 'White'),
+                sport: currentSport
+            };
+            // Verwende natives JSON.stringify statt Base64, um Encoding-Errors zu vermeiden
+            qrData = JSON.stringify(payload);
+        }
+
+        setTimeout(() => {
+            try {
+                new QRCode(qrContainer, {
+                    text: qrData,
+                    width: 200,
+                    height: 200,
+                    colorDark: "#000000", // Standard Schwarz (besser für Scanner)
+                    colorLight: "#ffffff", // Standard Weiß
+                    correctLevel: QRCode.CorrectLevel.L // Reduziert die Datendichte
+                });
+            } catch(e2) {
+                qrContainer.innerHTML = "<p style='color:red; font-size:10px;'>QR Render Error: " + e2.message + "</p>";
+            }
+        }, 50);
+    } catch(e1) {
+        qrContainer.innerHTML = "<p style='color:red; font-size:10px;'>Data Error: " + e1.message + "</p>";
     }
-
-    setTimeout(() => {
-        new QRCode(qrContainer, {
-            text: qrData,
-            width: 200,
-            height: 200,
-            colorDark: "#ffffff", // Dark Mode tauglich
-            colorLight: "#000000"
-        });
-    }, 50);
 }
 
 // ----------------------------------------------------------------------------
