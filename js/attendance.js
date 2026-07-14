@@ -57,8 +57,7 @@ function generateStudentQR() {
         width: 200,
         height: 200,
         colorDark: "#ffffff", // Dark Mode tauglich
-        colorLight: "#000000",
-        correctLevel: QRCode.CorrectLevel.L
+        colorLight: "#000000"
     });
 }
 
