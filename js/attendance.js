@@ -52,13 +52,15 @@ function generateStudentQR() {
         qrData = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
     }
 
-    new QRCode(qrContainer, {
-        text: qrData,
-        width: 200,
-        height: 200,
-        colorDark: "#ffffff", // Dark Mode tauglich
-        colorLight: "#000000"
-    });
+    setTimeout(() => {
+        new QRCode(qrContainer, {
+            text: qrData,
+            width: 200,
+            height: 200,
+            colorDark: "#ffffff", // Dark Mode tauglich
+            colorLight: "#000000"
+        });
+    }, 50);
 }
 
 // ----------------------------------------------------------------------------
