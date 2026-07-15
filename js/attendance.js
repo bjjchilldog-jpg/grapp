@@ -302,15 +302,17 @@ function showCoachSetupQR() {
         waGroup: safeGet('grapp_wa_group', '')
     };
 
-    new QRCode(qrContainer, {
-        text: JSON.stringify(payload),
-        width: 200,
-        height: 200,
-        colorDark: "#ffffff",
-        colorLight: "#000000"
-    });
-    
     qrContainer.style.display = 'block';
+
+    setTimeout(() => {
+        new QRCode(qrContainer, {
+            text: JSON.stringify(payload),
+            width: 200,
+            height: 200,
+            colorDark: "#ffffff",
+            colorLight: "#000000"
+        });
+    }, 50);
 }
 
 let setupScanner = null;
