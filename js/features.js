@@ -1118,13 +1118,18 @@ function sendAttendeeToWebhook(studentData) {
     
     alert("System-Check: Sende Daten an Google! Link startet mit: " + webhookUrl.substring(0, 45) + "...");
 
-    fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(studentData)
-    })
-    .then(() => console.log("Live-Tracking: Erfolgreich an Google Sheets übertragen."))
-    .catch(err => console.error("Webhook Error:", err));
+    const params = new URLSearchParams({
+        name: studentData.name,
+        sport: studentData.sport,
+        belt: studentData.belt,
+        time: studentData.time,
+        date: studentData.date
+    });
+    
+    // Unblockable GET Request via Image tag (bypasses all CORS/Redirect issues)
+    const img = new Image();
+    img.src = webhookUrl + "?" + params.toString();
+    console.log("Live-Tracking: Ping gesendet an " + webhookUrl);
 }
 
 function processTeamFeedbackAutomation() {
