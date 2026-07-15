@@ -270,8 +270,9 @@ function clearAttendanceList() {
 // COACH SELF-CHECK-IN
 // ----------------------------------------------------------------------------
 function coachSelfCheckIn() {
+    const sport = typeof currentSport !== 'undefined' ? currentSport : 'bjj';
     const name = safeGet('grapp_user_name', 'Coach');
-    const belt = safeGet('grapp_user_belt', 'Black');
+    const belt = safeGet('grapp_user_belt_' + sport, 'Black');
     
     let list = safeGet('grapp_attendance_today', []);
     const alreadyScanned = list.some(item => item.name === name);
@@ -281,7 +282,7 @@ function coachSelfCheckIn() {
         const data = {
             name: name,
             belt: belt,
-            sport: typeof currentSport !== 'undefined' ? currentSport : 'BJJ',
+            sport: sport,
             time: now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
             date: now.toLocaleDateString('de-DE')
         };
