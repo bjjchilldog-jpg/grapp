@@ -302,7 +302,8 @@ function showCoachSetupQR() {
     const payload = {
         type: "grapp_gym_setup",
         formId: safeGet('grapp_form_id', ''),
-        waGroup: safeGet('grapp_wa_group', '')
+        waGroup: safeGet('grapp_wa_group', ''),
+        webhookUrl: safeGet('grapp_webhook_url', '')
     };
 
     qrContainer.style.display = 'block';
@@ -346,6 +347,7 @@ function startGymQRScanner() {
             if (data.type === "grapp_gym_setup") {
                 if(data.formId) safeSet('grapp_form_id', data.formId);
                 if(data.waGroup) safeSet('grapp_wa_group', data.waGroup);
+                if(data.webhookUrl) safeSet('grapp_webhook_url', data.webhookUrl);
                 
                 alert("✅ Gym erfolgreich verknüpft! Das Teamklima-Feedback und der WhatsApp-Chat sind nun eingerichtet.");
                 
