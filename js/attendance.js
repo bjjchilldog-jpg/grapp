@@ -305,13 +305,18 @@ function showCoachSetupQR() {
     qrContainer.style.display = 'block';
 
     setTimeout(() => {
-        new QRCode(qrContainer, {
-            text: JSON.stringify(payload),
-            width: 200,
-            height: 200,
-            colorDark: "#ffffff",
-            colorLight: "#000000"
-        });
+        try {
+            new QRCode(qrContainer, {
+                text: JSON.stringify(payload),
+                width: 200,
+                height: 200,
+                colorDark: "#ffffff",
+                colorLight: "#000000",
+                correctLevel: QRCode.CorrectLevel.L
+            });
+        } catch(e) {
+            alert("QR Fehler: " + e.message);
+        }
     }, 50);
 }
 
