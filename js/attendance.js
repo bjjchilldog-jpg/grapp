@@ -285,7 +285,6 @@ function coachSelfCheckIn() {
 // ----------------------------------------------------------------------------
 
 function showCoachSetupQR() {
-    alert("Klick erkannt! Lade Code...");
     const qrContainer = document.getElementById('coachSetupQR');
     if (!qrContainer) {
         alert("Container nicht gefunden!");
