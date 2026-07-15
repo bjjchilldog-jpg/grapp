@@ -1,5 +1,5 @@
 // GrAPP Service Worker — Offline-Cache
-const CACHE_NAME = 'grapp-v16';
+const CACHE_NAME = 'grapp-v17';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -13,7 +13,9 @@ const ASSETS_TO_CACHE = [
     './js/playbook.js',
     './manifest.json',
     './img/icon-192.png',
-    './img/icon-512.png'
+    './img/icon-512.png',
+    './img/logo.png',
+    './js/qrcode.min.js'
 ];
 
 // Installation: Alle Core-Assets cachen
