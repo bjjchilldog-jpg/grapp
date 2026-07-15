@@ -99,7 +99,7 @@ function startScanner() {
 
     // Initialisiere die Kamera
     try {
-        html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+        html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250}, videoConstraints: { facingMode: "environment" } }, false);
         html5QrcodeScanner.render(onScanSuccess, onScanFailure);
     } catch(e) {
         alert("Scanner Fehler: " + e.message);
@@ -338,7 +338,7 @@ function startGymQRScanner() {
     }
 
     reader.style.display = 'block';
-    setupScanner = new Html5QrcodeScanner("student-qr-reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+    setupScanner = new Html5QrcodeScanner("student-qr-reader", { fps: 10, qrbox: {width: 250, height: 250}, videoConstraints: { facingMode: "environment" } }, false);
     
     setupScanner.render((decodedText) => {
         try {
