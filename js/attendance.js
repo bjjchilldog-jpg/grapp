@@ -75,6 +75,22 @@ function generateStudentQR() {
 // DER COACH: Scanner, Google Webhook & SiFa-Datenbank Trigger
 // ----------------------------------------------------------------------------
 let html5QrcodeScanner = null;
+let coachFacingMode = "environment";
+
+function toggleCoachCamera() {
+    coachFacingMode = (coachFacingMode === "environment") ? "user" : "environment";
+    if (html5QrcodeScanner) {
+        html5QrcodeScanner.clear().then(() => {
+            html5QrcodeScanner = null;
+            const qrReader = document.getElementById('qr-reader');
+            const clone = qrReader.cloneNode(true);
+            qrReader.parentNode.replaceChild(clone, qrReader);
+            clone.innerHTML = "";
+            document.getElementById('btnSwitchCameraCoach').style.display = 'none';
+            startScanner();
+        });
+    }
+}
 
 function startScanner() {
     const qrReader = document.getElementById('qr-reader');
@@ -90,16 +106,18 @@ function startScanner() {
             clone.innerHTML = "";
             document.getElementById('btnScanAthletes').innerHTML = '<span class="icon">📸</span> SCHÜLER SCANNEN';
             clone.style.display = 'none';
+            if (document.getElementById('btnSwitchCameraCoach')) document.getElementById('btnSwitchCameraCoach').style.display = 'none';
         }).catch(err => console.log("Cleanup Error", err));
         return;
     }
 
     document.getElementById('btnScanAthletes').innerHTML = '<span class="icon">✖</span> SCANNER BEENDEN';
     qrReader.style.display = 'block';
+    if (document.getElementById('btnSwitchCameraCoach')) document.getElementById('btnSwitchCameraCoach').style.display = 'block';
 
     // Initialisiere die Kamera
     try {
-        html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250}, videoConstraints: { facingMode: "environment" } }, false);
+        html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250}, videoConstraints: { facingMode: coachFacingMode } }, false);
         html5QrcodeScanner.render(onScanSuccess, onScanFailure);
     } catch(e) {
         alert("Scanner Fehler: " + e.message);
@@ -325,20 +343,42 @@ function showCoachSetupQR() {
 }
 
 let setupScanner = null;
+let studentFacingMode = "environment";
+
+function toggleStudentCamera() {
+    studentFacingMode = (studentFacingMode === "environment") ? "user" : "environment";
+    if (setupScanner) {
+        setupScanner.clear().then(() => {
+            setupScanner = null;
+            const reader = document.getElementById('student-qr-reader');
+            const clone = reader.cloneNode(true);
+            reader.parentNode.replaceChild(clone, reader);
+            clone.innerHTML = "";
+            document.getElementById('btnSwitchCameraStudent').style.display = 'none';
+            startGymQRScanner();
+        });
+    }
+}
 
 function startGymQRScanner() {
     const reader = document.getElementById('student-qr-reader');
     if (!reader) return;
 
     if (setupScanner) {
-        setupScanner.clear();
-        setupScanner = null;
-        reader.style.display = 'none';
+        setupScanner.clear().then(() => {
+            setupScanner = null;
+            const clone = reader.cloneNode(true);
+            reader.parentNode.replaceChild(clone, reader);
+            clone.innerHTML = "";
+            clone.style.display = 'none';
+            if (document.getElementById('btnSwitchCameraStudent')) document.getElementById('btnSwitchCameraStudent').style.display = 'none';
+        }).catch(err => console.log(err));
         return;
     }
 
     reader.style.display = 'block';
-    setupScanner = new Html5QrcodeScanner("student-qr-reader", { fps: 10, qrbox: {width: 250, height: 250}, videoConstraints: { facingMode: "environment" } }, false);
+    if (document.getElementById('btnSwitchCameraStudent')) document.getElementById('btnSwitchCameraStudent').style.display = 'block';
+    setupScanner = new Html5QrcodeScanner("student-qr-reader", { fps: 10, qrbox: {width: 250, height: 250}, videoConstraints: { facingMode: studentFacingMode } }, false);
     
     setupScanner.render((decodedText) => {
         try {
@@ -355,6 +395,7 @@ function startGymQRScanner() {
                 setupScanner.clear();
                 setupScanner = null;
                 reader.style.display = 'none';
+                if (document.getElementById('btnSwitchCameraStudent')) document.getElementById('btnSwitchCameraStudent').style.display = 'none';
             } else {
                 throw new Error("Falscher Typ");
             }

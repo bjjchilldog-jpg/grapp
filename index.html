@@ -173,6 +173,7 @@
                 <h3 data-en="🔗 GYM LINKING" data-en="🔗 GYM LINKING">🔗 GYM VERKNÜPFUNG</h3>
                 <p style="font-size:12px; color:#ccc;" data-en="If your coach showed you a setup code, click here to save your gym's Google Forms ID." data-en="If your coach showed you a setup code, click here to save your gym's Google Forms ID.">Wenn dein Coach dir einen Setup-Code gezeigt hat, klicke hier um die Google-Forms-ID deines Gyms zu speichern.</p>
                 <button class="btn-sm btn-sm-cal" style="width:100%; padding:12px; font-size:13px; margin-top:5px;" onclick="startGymQRScanner()" data-en="SCAN SETUP CODE" data-en="SCAN SETUP CODE">SETUP-CODE SCANNEN</button>
+                <button class="btn-sm btn-sm-cal" style="width:100%; padding:12px; font-size:13px; margin-top:5px; display:none;" id="btnSwitchCameraStudent" onclick="toggleStudentCamera()"><span class="icon">🔄</span> KAMERA WECHSELN</button>
                 <div id="student-qr-reader" style="width: 100%; max-width: 400px; margin: 10px auto; border: 2px solid #333; border-radius: 8px; display: none;"></div>
             </div>
         </div>
@@ -186,7 +187,8 @@
             </div>
 
             <button class="btn btn-red" style="margin-top:20px;" id="btnScanAthletes" onclick="startScanner()"><span class="icon">📸</span><span data-en="SCAN STUDENTS">SCHÜLER SCANNEN</span></button>
-            <button class="btn btn-white" style="margin-top:10px; width:100%;" onclick="coachSelfCheckIn()"><span class="icon">🙋</span><span data-en="CHECK MYSELF IN">MICH SELBST EINCHECKEN</span></button>
+            <button class="btn btn-white" style="margin-top:10px; width:100%; display:none;" id="btnSwitchCameraCoach" onclick="toggleCoachCamera()"><span class="icon">🔄</span> KAMERA WECHSELN</button>
+            <button class="btn btn-white" style="margin-top:10px; width:100%;" onclick="coachSelfCheckIn()"><span class="icon">🙋‍♂️</span><span data-en="CHECK MYSELF IN">MICH SELBST EINCHECKEN</span></button>
             <div id="qr-reader"></div>
             
             <h3 style="margin-top:25px; border-top: 1px solid #333; padding-top:15px;" data-en="LIST TODAY">LISTE HEUTE</h3>
