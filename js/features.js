@@ -1106,11 +1106,17 @@ function uncheckStretchSession() {
 
 function sendAttendeeToWebhook(studentData) {
     if (!isUserPro()) {
+        alert("System-Check: Pro-Status nicht aktiv! Senden blockiert.");
         console.log("Sync übersprungen: Google Sheets Echtzeitübertragung ist ein Pro-Feature.");
         return;
     }
     const webhookUrl = localStorage.getItem('grapp_webhook_url');
-    if (!webhookUrl) return;
+    if (!webhookUrl) {
+        alert("System-Check: Kein Webhook Link im Profil gefunden!");
+        return;
+    }
+    
+    alert("System-Check: Sende Daten an Google! Link startet mit: " + webhookUrl.substring(0, 45) + "...");
 
     fetch(webhookUrl, {
         method: 'POST',
