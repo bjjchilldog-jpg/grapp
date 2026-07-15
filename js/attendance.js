@@ -89,11 +89,13 @@ function startScanner() {
             qrReader.parentNode.replaceChild(clone, qrReader);
             clone.innerHTML = "";
             document.getElementById('btnScanAthletes').innerHTML = '<span class="icon">📸</span> SCHÜLER SCANNEN';
+            clone.style.display = 'none';
         }).catch(err => console.log("Cleanup Error", err));
         return;
     }
 
     document.getElementById('btnScanAthletes').innerHTML = '<span class="icon">✖</span> SCANNER BEENDEN';
+    qrReader.style.display = 'block';
 
     // Initialisiere die Kamera
     try {
