@@ -96,8 +96,12 @@ function startScanner() {
     document.getElementById('btnScanAthletes').innerHTML = '<span class="icon">✖</span> SCANNER BEENDEN';
 
     // Initialisiere die Kamera
-    html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
-    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    try {
+        html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    } catch(e) {
+        alert("Scanner Fehler: " + e.message);
+    }
 }
 
 function onScanSuccess(decodedText, decodedResult) {

@@ -1,5 +1,5 @@
 // GrAPP Service Worker — Offline-Cache
-const CACHE_NAME = 'grapp-v18';
+const CACHE_NAME = 'grapp-v19';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
