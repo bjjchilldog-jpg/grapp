@@ -1126,10 +1126,13 @@ function sendAttendeeToWebhook(studentData) {
         date: studentData.date
     });
     
-    // Unblockable GET Request via Image tag (bypasses all CORS/Redirect issues)
-    const img = new Image();
-    img.src = webhookUrl + "?" + params.toString();
-    console.log("Live-Tracking: Ping gesendet an " + webhookUrl);
+    // Standard GET Fetch (to avoid adblocker tracking pixel blocks on Images)
+    fetch(webhookUrl + "?" + params.toString(), {
+        method: 'GET',
+        mode: 'no-cors'
+    })
+    .then(() => console.log("Live-Tracking: GET-Fetch erfolgreich an Google gesendet."))
+    .catch(err => console.error("Webhook GET Error:", err));
 }
 
 function processTeamFeedbackAutomation() {
